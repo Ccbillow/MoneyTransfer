@@ -33,11 +33,11 @@ public class TransferServiceImpl implements TransferService {
     @Transactional
     public void transfer(TransferRequest request) {
         Account from = accountRepository.findById(request.getFromId()).orElseThrow(() -> {
-            log.error("money transfer business exception,  account not exist, from:[{}]", request.getFromId());
+            log.error("money transfer fail, sender account not exist, from:[{}]", request.getFromId());
             return new BusinessException(ExceptionEnum.USER_NOT_EXIST.getErrorCode(), "from account not exist");
         });
         Account to = accountRepository.findById(request.getToId()).orElseThrow(() -> {
-            log.error("money transfer business exception, receiver account not exist, from:[{}]", request.getToId());
+            log.error("money transfer fail, receiver account not exist, from:[{}]", request.getToId());
             return new BusinessException(ExceptionEnum.USER_NOT_EXIST.getErrorCode(), "to account not exist");
         });
 
