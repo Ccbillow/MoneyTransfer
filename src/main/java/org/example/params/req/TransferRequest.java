@@ -15,9 +15,13 @@ public class TransferRequest {
     private Long toId;
 
     @NotNull(message = "amount can not be null")
-    @DecimalMin(value = "0.01", inclusive = true, message = "amount must be greater than 0")
+    @DecimalMin(value = "0.01", message = "amount must be greater than 0")
     private BigDecimal amount;
 
+    /**
+     * transfer currency
+     * default using from account basic currency
+     */
     @NotNull(message = "transferCurrency can not be null")
     private Currency transferCurrency;
 

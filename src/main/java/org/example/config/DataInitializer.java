@@ -49,7 +49,7 @@ public class DataInitializer implements CommandLineRunner {
          */
         Account bob = new Account();
         bob.setName("Bob");
-        bob.setCurrency(Currency.USD);
+        bob.setCurrency(Currency.JPN);
         bob.setBalance(BigDecimal.valueOf(500));
 
         accountRepository.save(alice);
