@@ -10,7 +10,7 @@ public enum ExceptionEnum implements BaseErrorInfoInterface {
     PARAM_ILLEGAL("4001","param illegal!"),
     NOT_FOUND("4004", "not found resources!"),
     USER_NOT_EXIST("4008", "user not exist!"),
-    RATE_NOT_SUPPORT("4009", "not supporting rate!"),
+    RATE_NOT_SUPPORT("4009", "not support rate!"),
     MONEY_TRANSFER_ERROR("4010", "money transfer error!"),
     INTERNAL_SERVER_ERROR("5000", "internal server error!"),
     SERVER_BUSY("5003","server busy, please try later!");

@@ -5,6 +5,6 @@ public class BaseConstant {
     /**
      * Fee Rate
      */
-    public static final String FEE_RATE = "0.01";
+    public static final double FEE_RATE = 0.01;
 
 }

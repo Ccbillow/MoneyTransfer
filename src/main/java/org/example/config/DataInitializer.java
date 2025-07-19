@@ -62,7 +62,7 @@ public class DataInitializer implements CommandLineRunner {
         rate.setId(1L);
         rate.setFromCurrency(Currency.USD);
         rate.setToCurrency(Currency.AUD);
-        rate.setRate(new BigDecimal(2));
+        rate.setRate(BigDecimal.valueOf(2));
         fxRateRepository.save(rate);
     }
 }

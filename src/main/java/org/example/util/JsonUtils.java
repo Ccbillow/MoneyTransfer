@@ -61,9 +61,10 @@ public class JsonUtils {
         }
     }
 
-    public static <T> T fromPathToObj(String path, TypeReference<T> typeRef) {
+    public static <T> List<T> fromPathToObjList(String path, Class<T> clazz) {
         try (InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(path)) {
-            return objectMapper.readValue(is, typeRef);
+            CollectionType listType = objectMapper.getTypeFactory().constructCollectionType(List.class, clazz);
+            return objectMapper.readValue(is, listType);
         } catch (Exception e) {
             throw new RuntimeException("Failed to read JSON from " + path, e);
         }

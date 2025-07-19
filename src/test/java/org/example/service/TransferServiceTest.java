@@ -1,5 +1,6 @@
 package org.example.service;
 
+import org.example.BaseTest;
 import org.example.comm.enums.Currency;
 import org.example.comm.enums.ExceptionEnum;
 import org.example.exception.BusinessException;
@@ -10,11 +11,8 @@ import org.example.repository.AccountRepository;
 import org.example.repository.FxRateRepository;
 import org.example.service.impl.TransferService;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -24,9 +22,7 @@ import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-@SpringBootTest
-@RunWith(SpringRunner.class)
-public class TransferServiceTest {
+public class TransferServiceTest extends BaseTest {
     @Autowired
     private TransferService transferService;
 
@@ -35,6 +31,7 @@ public class TransferServiceTest {
 
     @MockBean
     private FxRateRepository fxRateRepository;
+
 
     @Test
     public void testTransfer_From_Not_Exist() {
@@ -66,7 +63,7 @@ public class TransferServiceTest {
         from.setId(1L);
         from.setName("Alice");
         from.setCurrency(Currency.USD);
-        from.setBalance(new BigDecimal("1000"));
+        from.setBalance(BigDecimal.valueOf(1000));
 
         when(accountRepository.findById(1L)).thenReturn(Optional.of(from));
         when(accountRepository.findById(2L)).thenReturn(Optional.ofNullable(null));
@@ -92,13 +89,13 @@ public class TransferServiceTest {
         from.setId(1L);
         from.setName("Alice");
         from.setCurrency(Currency.USD);
-        from.setBalance(new BigDecimal("1000"));
+        from.setBalance(BigDecimal.valueOf(1000));
 
         Account to = new Account();
         to.setId(2L);
         to.setName("Bob");
         to.setCurrency(Currency.JPN);
-        to.setBalance(new BigDecimal("500"));
+        to.setBalance(BigDecimal.valueOf(500));
 
         when(accountRepository.findById(1L)).thenReturn(Optional.of(from));
         when(accountRepository.findById(2L)).thenReturn(Optional.of(to));
@@ -117,19 +114,19 @@ public class TransferServiceTest {
         request.setFromId(1L);
         request.setToId(2L);
         request.setTransferCurrency(Currency.USD);
-        request.setAmount(new BigDecimal("1000"));
+        request.setAmount(BigDecimal.valueOf(1000));
 
         Account from = new Account();
         from.setId(1L);
         from.setName("Alice");
         from.setCurrency(Currency.USD);
-        from.setBalance(new BigDecimal("1000"));
+        from.setBalance(BigDecimal.valueOf(1000));
 
         Account to = new Account();
         to.setId(2L);
         to.setName("Bob");
         to.setCurrency(Currency.USD);
-        to.setBalance(new BigDecimal("500"));
+        to.setBalance(BigDecimal.valueOf(500));
 
         when(accountRepository.findById(1L)).thenReturn(Optional.of(from));
         when(accountRepository.findById(2L)).thenReturn(Optional.of(to));
@@ -149,19 +146,19 @@ public class TransferServiceTest {
         request.setFromId(1L);
         request.setToId(2L);
         request.setTransferCurrency(Currency.USD);
-        request.setAmount(new BigDecimal("50"));
+        request.setAmount(BigDecimal.valueOf(50));
 
         Account from = new Account();
         from.setId(1L);
         from.setName("Alice");
         from.setCurrency(Currency.USD);
-        from.setBalance(new BigDecimal("1000"));
+        from.setBalance(BigDecimal.valueOf(1000));
 
         Account to = new Account();
         to.setId(2L);
         to.setName("Bob");
         to.setCurrency(Currency.USD);
-        to.setBalance(new BigDecimal("500"));
+        to.setBalance(BigDecimal.valueOf(500));
 
         when(accountRepository.findById(1L)).thenReturn(Optional.of(from));
         when(accountRepository.findById(2L)).thenReturn(Optional.of(to));
@@ -169,8 +166,8 @@ public class TransferServiceTest {
 
         transferService.transfer(request);
 
-        assertEquals(new BigDecimal("949.50"), from.getBalance());
-        assertEquals(new BigDecimal("550"), to.getBalance());
+        assertEquals(0, BigDecimal.valueOf(949.50).compareTo(from.getBalance()));
+        assertEquals(0, BigDecimal.valueOf(550).compareTo(to.getBalance()));
     }
 
     @Test
@@ -179,19 +176,19 @@ public class TransferServiceTest {
         request.setFromId(1L);
         request.setToId(2L);
         request.setTransferCurrency(Currency.USD);
-        request.setAmount(new BigDecimal("50"));
+        request.setAmount(BigDecimal.valueOf(50));
 
         Account from = new Account();
         from.setId(1L);
         from.setName("Alice");
         from.setCurrency(Currency.USD);
-        from.setBalance(new BigDecimal("1000"));
+        from.setBalance(BigDecimal.valueOf(1000));
 
         Account to = new Account();
         to.setId(2L);
         to.setName("Bob");
         to.setCurrency(Currency.JPN);
-        to.setBalance(new BigDecimal("500"));
+        to.setBalance(BigDecimal.valueOf(500));
 
         when(accountRepository.findById(1L)).thenReturn(Optional.of(from));
         when(accountRepository.findById(2L)).thenReturn(Optional.of(to));
@@ -204,7 +201,7 @@ public class TransferServiceTest {
         );
 
         assertEquals(ExceptionEnum.RATE_NOT_SUPPORT.getErrorCode(), ex.getErrorCode());
-        assertEquals("not supporting rate!", ex.getErrorMsg());
+        assertEquals("not support rate!", ex.getErrorMsg());
     }
 
     @Test
@@ -213,25 +210,25 @@ public class TransferServiceTest {
         request.setFromId(1L);
         request.setToId(2L);
         request.setTransferCurrency(Currency.USD);
-        request.setAmount(new BigDecimal("1000"));
+        request.setAmount(BigDecimal.valueOf(1000));
 
         Account from = new Account();
         from.setId(1L);
         from.setName("Alice");
         from.setCurrency(Currency.USD);
-        from.setBalance(new BigDecimal("1000"));
+        from.setBalance(BigDecimal.valueOf(1000));
 
         Account to = new Account();
         to.setId(2L);
         to.setName("Bob");
         to.setCurrency(Currency.AUD);
-        to.setBalance(new BigDecimal("500"));
+        to.setBalance(BigDecimal.valueOf(500));
 
         FxRate rate = new FxRate();
         rate.setId(1L);
         rate.setFromCurrency(Currency.USD);
         rate.setToCurrency(Currency.AUD);
-        rate.setRate(new BigDecimal("2"));
+        rate.setRate(BigDecimal.valueOf(2));
 
         when(accountRepository.findById(1L)).thenReturn(Optional.of(from));
         when(accountRepository.findById(2L)).thenReturn(Optional.of(to));
@@ -253,25 +250,25 @@ public class TransferServiceTest {
         request.setFromId(1L);
         request.setToId(2L);
         request.setTransferCurrency(Currency.USD);
-        request.setAmount(new BigDecimal("50"));
+        request.setAmount(BigDecimal.valueOf(50));
 
         Account from = new Account();
         from.setId(1L);
         from.setName("Alice");
         from.setCurrency(Currency.USD);
-        from.setBalance(new BigDecimal("1000"));
+        from.setBalance(BigDecimal.valueOf(1000));
 
         Account to = new Account();
         to.setId(2L);
         to.setName("Bob");
         to.setCurrency(Currency.AUD);
-        to.setBalance(new BigDecimal("500"));
+        to.setBalance(BigDecimal.valueOf(500));
 
         FxRate rate = new FxRate();
         rate.setId(1L);
         rate.setFromCurrency(Currency.USD);
         rate.setToCurrency(Currency.AUD);
-        rate.setRate(new BigDecimal("2"));
+        rate.setRate(BigDecimal.valueOf(2));
         when(accountRepository.findById(1L)).thenReturn(Optional.of(from));
         when(accountRepository.findById(2L)).thenReturn(Optional.of(to));
 
@@ -280,7 +277,7 @@ public class TransferServiceTest {
 
         transferService.transfer(request);
 
-        assertEquals(new BigDecimal("949.50"), from.getBalance());
-        assertEquals(new BigDecimal("600"), to.getBalance());
+        assertEquals(0, BigDecimal.valueOf(949.50).compareTo(from.getBalance()));
+        assertEquals(0, BigDecimal.valueOf(600).compareTo(to.getBalance()));
     }
 }

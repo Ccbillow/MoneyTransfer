@@ -77,7 +77,7 @@ public class TransferServiceImpl implements TransferService {
      * @param fxRate        money exchange rate
      */
     private void performTransfer(Account from, Account to, BigDecimal requestAmount, BigDecimal fxRate) {
-        BigDecimal fee = requestAmount.multiply(new BigDecimal(BaseConstant.FEE_RATE));
+        BigDecimal fee = requestAmount.multiply(BigDecimal.valueOf(BaseConstant.FEE_RATE));
         BigDecimal totalDeduct = requestAmount.add(fee);
 
         // 1. check balance
