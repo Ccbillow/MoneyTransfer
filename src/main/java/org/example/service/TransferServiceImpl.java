@@ -47,14 +47,14 @@ public class TransferServiceImpl implements TransferService {
         BigDecimal requestAmount = request.getAmount();
 
         // 1. check from currency
-        if (from.getCurrency() != requestCurrency) {
+        if (!from.getCurrency().equals(requestCurrency)) {
             log.error("traceId:{}, sender must use base currency, sender:[{}], baseCurrency:[{}], requestCurrency:[{}]",
                     traceId, request.getFromId(), from.getCurrency(), requestCurrency);
             throw new BusinessException(ExceptionEnum.PARAM_ILLEGAL.getErrorCode(), "Sender must use base currency.");
         }
 
         // 2. to same currency
-        if (to.getCurrency() == requestCurrency) {
+        if (to.getCurrency().equals(requestCurrency)) {
             performTransfer(from, to, requestAmount, BigDecimal.ONE, traceId);
             return;
         }
