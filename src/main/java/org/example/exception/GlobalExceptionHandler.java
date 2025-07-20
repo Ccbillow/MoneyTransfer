@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.apache.tomcat.util.buf.StringUtils;
 import org.example.comm.enums.ExceptionEnum;
 import org.example.params.resp.CommonResponse;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -26,7 +27,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseBody
-    public CommonResponse bindExceptionHandler(MethodArgumentNotValidException e) {
+    public CommonResponse<Void> bindExceptionHandler(MethodArgumentNotValidException e) {
         BindingResult bindingResult = e.getBindingResult();
         List<String> errors = new ArrayList<>();
         bindingResult.getFieldErrors().forEach(item -> {
@@ -34,10 +35,20 @@ public class GlobalExceptionHandler {
         });
         String errorMessage = StringUtils.join(errors, '|');
 
-        CommonResponse response = new CommonResponse();
+        CommonResponse<Void> response = new CommonResponse();
         response.setSuccess(false);
         response.setErrorCode(ExceptionEnum.PARAM_ILLEGAL.getErrorCode());
         response.setErrorMsg(errorMessage);
+        return response;
+    }
+
+    @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+    @ResponseBody
+    public CommonResponse<Void> handleOptimisticLockException(Exception ex) {
+        CommonResponse<Void> response = new CommonResponse();
+        response.setSuccess(false);
+        response.setErrorCode(ExceptionEnum.OPTIMISTIC_LOCK_ERROR.getErrorCode());
+        response.setErrorMsg(ExceptionEnum.OPTIMISTIC_LOCK_ERROR.getErrorMsg());
         return response;
     }
 
@@ -49,8 +60,8 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(value = BusinessException.class)
     @ResponseBody
-    public CommonResponse bizExceptionHandler(HttpServletRequest req, BusinessException e){
-        CommonResponse response = new CommonResponse();
+    public CommonResponse<Void> bizExceptionHandler(HttpServletRequest req, BusinessException e){
+        CommonResponse<Void> response = new CommonResponse();
         response.setSuccess(false);
         response.setErrorCode(e.getErrorCode());
         response.setErrorMsg(e.getErrorMsg());
@@ -65,8 +76,8 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(value = Exception.class)
     @ResponseBody
-    public CommonResponse exceptionHandler(HttpServletRequest req, Exception e){
-        CommonResponse response = new CommonResponse();
+    public CommonResponse<Void> exceptionHandler(HttpServletRequest req, Exception e){
+        CommonResponse<Void> response = new CommonResponse();
         response.setSuccess(false);
         response.setErrorCode(ExceptionEnum.INTERNAL_SERVER_ERROR.getErrorCode());
         response.setErrorMsg(ExceptionEnum.INTERNAL_SERVER_ERROR.getErrorMsg());

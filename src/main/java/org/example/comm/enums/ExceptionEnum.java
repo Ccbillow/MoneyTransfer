@@ -12,6 +12,7 @@ public enum ExceptionEnum implements BaseErrorInfoInterface {
     USER_NOT_EXIST("4008", "user not exist!"),
     RATE_NOT_SUPPORT("4009", "not support rate!"),
     MONEY_TRANSFER_ERROR("4010", "money transfer error!"),
+    OPTIMISTIC_LOCK_ERROR("4011", "optimistic lock error!"),
     INTERNAL_SERVER_ERROR("5000", "internal server error!"),
     SERVER_BUSY("5003","server busy, please try later!");
 

@@ -11,6 +11,7 @@ import org.example.params.resp.CommonResponse;
 import org.example.repository.AccountRepository;
 import org.example.repository.FxRateRepository;
 import org.example.util.JsonUtils;
+import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -32,8 +33,12 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
+/**
+ * transfer controller test
+ */
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class TransferControllerTest extends BaseTest {
@@ -220,6 +225,49 @@ public class TransferControllerTest extends BaseTest {
         assertEquals("Sender must use base currency.", r3.getErrorMsg());
     }
 
+    @Test
+    public void testConcurrentTransfer_OptimisticLockException() throws Exception {
+        setup("testdata/accounts_test_one.json", "testdata/rate_test_one.json");
+        ExecutorService executor = Executors.newFixedThreadPool(3);
+
+        List<Callable<CommonResponse<Void>>> tasks = List.of(
+                // Transfer 20 AUD from Bob to Alice
+                () -> send(1L, 2L, 20, Currency.USD),
+                // Transfer money from 40 USD  Alice to bob
+                () -> send(1L, 2L, 40, Currency.USD),
+                // Transfer money from 40 CNY  Alice to bob
+                () -> send(1L, 2L, 60, Currency.USD),
+                () -> send(1L, 2L, 10, Currency.USD),
+                () -> send(1L, 2L, 20, Currency.USD),
+                () -> send(1L, 2L, 1, Currency.USD),
+                () -> send(1L, 2L, 1, Currency.USD),
+                () -> send(1L, 2L, 1, Currency.USD),
+                () -> send(1L, 2L, 1, Currency.USD),
+                () -> send(1L, 2L, 1, Currency.USD)
+        );
+
+        List<Future<CommonResponse<Void>>> futures = executor.invokeAll(tasks);
+        executor.shutdown();
+        executor.awaitTermination(5, TimeUnit.SECONDS);
+
+        int successCount = 0;
+        int optimisticLockFailureCount = 0;
+        for (Future<CommonResponse<Void>> future : futures) {
+            CommonResponse<Void> response = future.get();
+            if (response.isSuccess()) {
+                successCount++;
+            } else if (ExceptionEnum.OPTIMISTIC_LOCK_ERROR.getErrorCode().equals(response.getErrorCode())) {
+                optimisticLockFailureCount++;
+            } else {
+                Assert.fail("Unexpected response code: " + response.getErrorMsg());
+            }
+        }
+
+        assertEquals(10,successCount + optimisticLockFailureCount);
+        assertTrue(optimisticLockFailureCount > 0, "Expected some optimistic lock failures");
+        assertTrue(successCount > 0, "Expected some successful transfers");
+    }
+
     @Transactional
     void setup(String accountPath, String ratePath) {
         // del old data
@@ -234,7 +282,7 @@ public class TransferControllerTest extends BaseTest {
         fxRateRepository.saveAll(balances);
     }
 
-    private CommonResponse<Void> send(Long fromId, Long toId, double amount, Currency currency) {
+    private CommonResponse<Void> send(Long fromId, Long toId, double amount, Currency currency) throws Exception {
         try {
             TransferRequest request = new TransferRequest();
             request.setFromId(fromId);
