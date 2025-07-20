@@ -229,17 +229,58 @@ public class TransferControllerTest extends BaseTest {
     }
 
     /**
-     * Test Concurrent
+     * Test the consistency of the amount after concurrent transfers
      *
      * Condition
+     *      from money(usd): 1000 - 1 * 10 - 0.01 * 10 = 989.9
+     *      to money(jpn): 500 + 150 * 10 = 2000
      *      tasks: 10
      *      concurrent:3
-     *      retry:3
      *
      * Result: all tasks success
      */
     @Test
-    public void testConcurrentTransfer_Retry_Success() throws Exception {
+    public void testConcurrentTransfer_Money_Success() throws Exception {
+        setup("testdata/accounts_test_one.json", "testdata/rate_test_one.json");
+        final Random random = new Random();
+        int concurrent = 10;
+
+        ExecutorService executor = Executors.newFixedThreadPool(3);
+        List<Callable<CommonResponse<Void>>> tasks = IntStream.range(0, concurrent)
+                .mapToObj(i -> (Callable<CommonResponse<Void>>) () -> send(1L, 2L, 1, Currency.USD))
+                .collect(Collectors.toList());
+
+        List<Future<CommonResponse<Void>>> futures = executor.invokeAll(tasks);
+        executor.shutdown();
+        executor.awaitTermination(5, TimeUnit.SECONDS);
+
+        int successCount = 0;
+        for (Future<CommonResponse<Void>> future : futures) {
+            CommonResponse<Void> response = future.get();
+            System.out.println("concurrent response:" + JsonUtils.toJson(response));
+            if (response.isSuccess()) {
+                successCount++;
+            }
+        }
+
+        assertEquals(successCount, concurrent);
+        verifyBalance(1L, BigDecimal.valueOf(989.90));
+        verifyBalance(2L, BigDecimal.valueOf(2000.00));
+    }
+
+
+    /**
+     * Test low-concurrency transfer, final success after retry
+     *
+     * Condition
+     *      tasks: 10
+     *      concurrency:3
+     *      retry:3
+     *
+     * Result: all success
+     */
+    @Test
+    public void testLowConcurrentTransfer_Retry_Success() throws Exception {
         setup("testdata/accounts_test_one.json", "testdata/rate_test_one.json");
         final Random random = new Random();
         int concurrent = 10;
@@ -254,41 +295,33 @@ public class TransferControllerTest extends BaseTest {
         executor.awaitTermination(5, TimeUnit.SECONDS);
 
         int successCount = 0;
-        int optimisticLockMaxRetryFailureCount = 0;
         for (Future<CommonResponse<Void>> future : futures) {
             CommonResponse<Void> response = future.get();
-            System.out.println("concurrent response:" + JsonUtils.toJson(response));
             if (response.isSuccess()) {
                 successCount++;
-            } else if (ExceptionEnum.OPTIMISTIC_LOCK_MAX_RETRY_ERROR.getErrorCode().equals(response.getErrorCode())) {
-                System.out.println(Thread.currentThread().getName() + " max retry error response:" + JsonUtils.toJson(response));
-                optimisticLockMaxRetryFailureCount++;
-            } else {
-                Assert.fail("Unexpected response code: " + response.getErrorMsg());
             }
         }
 
-        assertEquals(concurrent, successCount + optimisticLockMaxRetryFailureCount);
         assertEquals(successCount, concurrent);
     }
 
     /**
-     * Test Concurrent
+     * Test mid-concurrency transfer, final success after retry
      *
      * Condition
-     *      tasks: 10
-     *      concurrent:10
+     *      tasks: 50
+     *      concurrency:50
      *      retry:3
      *
-     * Result: some tasks success, some tasks fail
+     * Result: all success
      */
     @Test
-    public void testConcurrentTransfer_Retry_Fail() throws Exception {
+    public void testMidConcurrentTransfer_Retry_Success() throws Exception {
         setup("testdata/accounts_test_one.json", "testdata/rate_test_one.json");
         final Random random = new Random();
-        int concurrent = 10;
+        int concurrent = 50;
 
-        ExecutorService executor = Executors.newFixedThreadPool(10);
+        ExecutorService executor = Executors.newFixedThreadPool(concurrent);
         List<Callable<CommonResponse<Void>>> tasks = IntStream.range(0, concurrent)
                 .mapToObj(i -> randomTransferTask(random))
                 .collect(Collectors.toList());
@@ -298,39 +331,31 @@ public class TransferControllerTest extends BaseTest {
         executor.awaitTermination(5, TimeUnit.SECONDS);
 
         int successCount = 0;
-        int optimisticLockMaxRetryFailureCount = 0;
         for (Future<CommonResponse<Void>> future : futures) {
             CommonResponse<Void> response = future.get();
-            System.out.println("concurrent response:" + JsonUtils.toJson(response));
             if (response.isSuccess()) {
                 successCount++;
-            } else if (ExceptionEnum.OPTIMISTIC_LOCK_MAX_RETRY_ERROR.getErrorCode().equals(response.getErrorCode())) {
-                System.out.println(Thread.currentThread().getName() + " max retry error response:" + JsonUtils.toJson(response));
-                optimisticLockMaxRetryFailureCount++;
-            } else {
-                Assert.fail("Unexpected response code: " + response.getErrorMsg());
             }
         }
 
-        assertEquals(concurrent, successCount + optimisticLockMaxRetryFailureCount);
         assertEquals(successCount, concurrent);
     }
 
     /**
-     * Test High Concurrent
+     * Test hign-concurrency transfer, final fail after retry
      *
      * Condition
-     *      tasks: 500
-     *      concurrent:500
+     *      tasks: 1000
+     *      concurrency:1000
      *      retry:3
      *
      * Result: some tasks success, some tasks fail
      */
     @Test
-    public void testConcurrentTransfer_Retry_Fail_High_Concurrent() throws Exception {
+    public void testHighConcurrentTransfer_Retry_Fail() throws Exception {
         setup("testdata/accounts_test_hign_concurrent.json", "testdata/rate_test_high_concurrent.json");
         final Random random = new Random();
-        int concurrent = 500;
+        int concurrent = 1000;
 
         ExecutorService executor = Executors.newFixedThreadPool(concurrent);
         List<Callable<CommonResponse<Void>>> tasks = IntStream.range(0, concurrent)
@@ -345,7 +370,6 @@ public class TransferControllerTest extends BaseTest {
         int optimisticLockMaxRetryFailureCount = 0;
         for (Future<CommonResponse<Void>> future : futures) {
             CommonResponse<Void> response = future.get();
-            System.out.println("concurrent response:" + JsonUtils.toJson(response));
             if (response.isSuccess()) {
                 successCount++;
             } else if (ExceptionEnum.OPTIMISTIC_LOCK_MAX_RETRY_ERROR.getErrorCode().equals(response.getErrorCode())) {
