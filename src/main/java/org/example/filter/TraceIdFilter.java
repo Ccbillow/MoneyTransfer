@@ -20,6 +20,7 @@ public class TraceIdFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
+        // todo use global traceId instead of UUID
         String traceId = UUID.randomUUID().toString().replace("-", "");
         MDC.put("traceId", traceId);
         try {

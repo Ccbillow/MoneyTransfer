@@ -4,7 +4,6 @@ import jakarta.transaction.Transactional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.example.comm.BaseConstant;
-import org.example.comm.enums.Currency;
 import org.example.comm.enums.ExceptionEnum;
 import org.example.exception.BusinessException;
 import org.example.executor.OptimisticRetryExecutor;
@@ -22,7 +21,12 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class TransferServiceImpl implements TransferService {
@@ -59,49 +63,39 @@ public class TransferServiceImpl implements TransferService {
     @Transactional
     public void doTransfer(TransferRequest request) {
         String traceId = MDC.get("traceId");
-        if (request.getFromId().equals(request.getToId())) {
-            log.error("traceId:{}, same account transfer not allowed, from:[{}], to:[{}]",
-                    traceId, request.getFromId(), request.getToId());
-            throw new BusinessException(ExceptionEnum.PARAM_ILLEGAL.getErrorCode(), "same account transfer not allowed");
-        }
-        Account from = accountRepository.findById(request.getFromId()).orElseThrow(() -> {
-            log.error("traceId:{}, sender account not exist, from:[{}]", traceId, request.getFromId());
-            return new BusinessException(ExceptionEnum.USER_NOT_EXIST.getErrorCode(), "from account not exist");
-        });
-        Account to = accountRepository.findById(request.getToId()).orElseThrow(() -> {
-            log.error("traceId:{}, receiver account not exist, from:[{}]", traceId, request.getToId());
-            return new BusinessException(ExceptionEnum.USER_NOT_EXIST.getErrorCode(), "to account not exist");
-        });
 
-        Currency requestCurrency = request.getTransferCurrency();
-        BigDecimal requestAmount = request.getAmount();
+        // 1. check user
+        Map<Long, Account> accountMap = checkUser(request.getFromId(), request.getToId(), traceId);
+        Account from = accountMap.get(request.getFromId());
+        Account to = accountMap.get(request.getToId());
 
-        // 1. check from currency
-        if (!from.getCurrency().equals(requestCurrency)) {
+        // 2. check from currency
+        if (!from.getCurrency().equals(request.getTransferCurrency())) {
             log.error("traceId:{}, sender must use base currency, sender:[{}], baseCurrency:[{}], requestCurrency:[{}]",
-                    traceId, request.getFromId(), from.getCurrency(), requestCurrency);
+                    traceId, request.getFromId(), from.getCurrency(), request.getTransferCurrency());
             throw new BusinessException(ExceptionEnum.PARAM_ILLEGAL.getErrorCode(), "Sender must use base currency.");
         }
 
-        // 2. to same currency
-        if (to.getCurrency().equals(requestCurrency)) {
-            performTransfer(from, to, requestAmount, BigDecimal.ONE, traceId);
+        // 3. to same currency
+        if (to.getCurrency().equals(request.getTransferCurrency())) {
+            performTransfer(from, to, request.getAmount(), BigDecimal.ONE, traceId);
             return;
         }
 
         /*
-            3. check exchange rate
+            4. check exchange rate
                 3.1 not exist, can't transfer
                 3.1 exist, transfer
          */
+        // todo get fxRate from redis
         Optional<FxRate> fxRate = fxRateRepository.findByFromCurrencyAndToCurrency(from.getCurrency(), to.getCurrency());
         if (fxRate.isEmpty()) {
             log.error("traceId:{}, receiver:[{}] doesn't support:[{}], and no existing rate support, toCurrency:[{}]",
-                    traceId, to.getId(), requestCurrency, to.getCurrency());
+                    traceId, to.getId(), request.getTransferCurrency(), to.getCurrency());
             throw new BusinessException(ExceptionEnum.RATE_NOT_SUPPORT.getErrorCode(), ExceptionEnum.RATE_NOT_SUPPORT.getErrorMsg());
         }
 
-        performTransfer(from, to, requestAmount, fxRate.get().getRate(), traceId);
+        performTransfer(from, to, request.getAmount(), fxRate.get().getRate(), traceId);
     }
 
     /**
@@ -154,5 +148,33 @@ public class TransferServiceImpl implements TransferService {
         transferLog.setFee(fee);
         transferLog.setFxRate(fxRate);
         transferLogRepository.save(transferLog);
+    }
+
+    /**
+     * check user
+     *
+     * @param fromId sender
+     * @param toId receiver
+     * @param traceId uuid
+     * @return Map<userId, Account>
+     */
+    private Map<Long, Account> checkUser(Long fromId, Long toId, String traceId) {
+        if (fromId.equals(toId)) {
+            log.warn("traceId:{}, same account transfer not allowed, from:[{}], to:[{}]",
+                    traceId, fromId, toId);
+            throw new BusinessException(ExceptionEnum.PARAM_ILLEGAL.getErrorCode(), "same account transfer not allowed");
+        }
+
+        List<Account> accounts = accountRepository.findAllById(Arrays.asList(fromId, toId));
+        Map<Long, Account> accountMap = accounts.stream().collect(Collectors.toMap(Account::getId, Function.identity()));
+        if (accountMap.get(fromId) == null) {
+            log.error("traceId:{}, sender account not exist, from:[{}]", traceId, fromId);
+            throw new BusinessException(ExceptionEnum.USER_NOT_EXIST.getErrorCode(), "from account not exist");
+        }
+        if (accountMap.get(toId) == null) {
+            log.error("traceId:{}, receiver account not exist, to:[{}]", traceId, fromId);
+            throw new BusinessException(ExceptionEnum.USER_NOT_EXIST.getErrorCode(), "to account not exist");
+        }
+        return accountMap;
     }
 }
