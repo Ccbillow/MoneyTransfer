@@ -3,7 +3,7 @@ package org.example.controller;
 import jakarta.validation.Valid;
 import org.example.params.req.TransferRequest;
 import org.example.params.resp.CommonResponse;
-import org.example.service.impl.TransferService;
+import org.example.service.TransferService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;

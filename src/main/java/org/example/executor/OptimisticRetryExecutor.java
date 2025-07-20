@@ -26,6 +26,14 @@ public class OptimisticRetryExecutor {
         }, DEFAULT_MAX_RETRIES);
     }
 
+    /**
+     * Executes a task with retries on optimistic lock exceptions.
+     *
+     * @param task       business task
+     * @param maxRetries max retry times
+     * @return business result
+     * @throws BusinessException if retries exceed maxRetries
+     */
     public <T> T executeWithRetry(Supplier<T> task, int maxRetries) {
         int retry = 0;
         Random random = new Random();

@@ -13,6 +13,7 @@ public enum ExceptionEnum implements BaseErrorInfoInterface {
     RATE_NOT_SUPPORT("4009", "not support rate!"),
     MONEY_TRANSFER_ERROR("4010", "money transfer error!"),
     OPTIMISTIC_LOCK_MAX_RETRY_ERROR("4011", "max retry exceeded due to optimistic locking!"),
+    IDEMPOTENT_REQUEST("4012", "duplicate request!"),
     INTERNAL_SERVER_ERROR("5000", "internal server error!"),
     SERVER_BUSY("5003","server busy, please try later!");
 

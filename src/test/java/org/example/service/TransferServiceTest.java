@@ -10,7 +10,6 @@ import org.example.params.req.TransferRequest;
 import org.example.repository.AccountRepository;
 import org.example.repository.FxRateRepository;
 import org.example.repository.TransferLogRepository;
-import org.example.service.impl.TransferService;
 import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;

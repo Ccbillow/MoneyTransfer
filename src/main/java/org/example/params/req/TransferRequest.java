@@ -8,6 +8,13 @@ import java.math.BigDecimal;
 
 public class TransferRequest {
 
+    /**
+     * requestId
+     * for idempotent check
+     */
+//    @NotNull(message = "requestId can not be null")
+//    private String requestId;
+
     @NotNull(message = "fromId can not be null")
     private Long fromId;
 

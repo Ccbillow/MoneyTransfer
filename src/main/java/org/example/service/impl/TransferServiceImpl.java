@@ -1,4 +1,4 @@
-package org.example.service;
+package org.example.service.impl;
 
 import jakarta.transaction.Transactional;
 import org.apache.logging.log4j.LogManager;
@@ -14,7 +14,7 @@ import org.example.params.req.TransferRequest;
 import org.example.repository.AccountRepository;
 import org.example.repository.FxRateRepository;
 import org.example.repository.TransferLogRepository;
-import org.example.service.impl.TransferService;
+import org.example.service.TransferService;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -46,16 +46,21 @@ public class TransferServiceImpl implements TransferService {
 
 //    @Autowired
 //    private RedisLockExecutor redisLockExecutor;
+//
+//    @Autowired
+//    private IdempotentExecutor idempotentExecutor;
 
     @Override
     public void transfer(TransferRequest request) {
 //        String lockKey = String.format("transfer-lock:%d-%d",
 //                Math.min(request.getFromId(), request.getToId()),
 //                Math.max(request.getFromId(), request.getToId()));
-//        redisLockExecutor.executeWithLock(lockKey,
-//                5,
-//                10,
-//                () -> retryExecutor.executeWithRetry(() -> doTransfer(request)));
+//
+//        idempotentExecutor.executeWithIdempotency(request.getRequestId(), 3600, () -> {
+//            redisLockExecutor.executeWithLock(lockKey,
+//                    5, 10,
+//                    () -> retryExecutor.executeWithRetry(() -> doTransfer(request)));
+//        });
 
         retryExecutor.executeWithRetry(() -> doTransfer(request));
     }
@@ -100,12 +105,12 @@ public class TransferServiceImpl implements TransferService {
 
     /**
      * transfer
-     *
+     * <p>
      * same currency:
-     *      from -> fromCurrency(USD) -> toCurrency(JPN) -> to
-     *
+     * from -> fromCurrency(USD) -> toCurrency(JPN) -> to
+     * <p>
      * diff currency:
-     *      from -> fromCurrency(USD) -> fxRate(USD->JPN) -> toCurrency(JPN) -> to
+     * from -> fromCurrency(USD) -> fxRate(USD->JPN) -> toCurrency(JPN) -> to
      *
      * @param from          source account
      * @param to            target account
@@ -153,8 +158,8 @@ public class TransferServiceImpl implements TransferService {
     /**
      * check user
      *
-     * @param fromId sender
-     * @param toId receiver
+     * @param fromId  sender
+     * @param toId    receiver
      * @param traceId uuid
      * @return Map<userId, Account>
      */
