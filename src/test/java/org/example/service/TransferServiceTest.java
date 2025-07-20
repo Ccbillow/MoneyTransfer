@@ -9,8 +9,10 @@ import org.example.model.FxRate;
 import org.example.params.req.TransferRequest;
 import org.example.repository.AccountRepository;
 import org.example.repository.FxRateRepository;
+import org.example.repository.TransferLogRepository;
 import org.example.service.impl.TransferService;
 import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
@@ -35,6 +37,32 @@ public class TransferServiceTest extends BaseTest {
     @MockBean
     private FxRateRepository fxRateRepository;
 
+    @MockBean
+
+    private TransferLogRepository transferLogRepository;
+
+
+    @BeforeEach
+    public void init() {
+        when(transferLogRepository.save(any())).thenReturn(null);
+    }
+
+    @Test
+    public void testTransfer_Same_User() {
+        TransferRequest request = new TransferRequest();
+        request.setFromId(1L);
+        request.setToId(1L);
+        request.setTransferCurrency(Currency.USD);
+        request.setAmount(BigDecimal.ONE);
+
+        BusinessException ex = assertThrows(
+                BusinessException.class,
+                () -> transferService.transfer(request)
+        );
+
+        assertEquals(ex.getErrorCode(), ExceptionEnum.PARAM_ILLEGAL.getErrorCode());
+        assertEquals(ex.getErrorMsg(), "same account transfer not allowed");
+    }
 
     @Test
     public void testTransfer_From_Not_Exist() {

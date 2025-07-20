@@ -1,5 +1,6 @@
 DELETE FROM fx_rate;
 DELETE FROM account;
+DELETE FROM transfer_log;
 
 INSERT INTO account (id, name, currency, balance) VALUES (1, 'Alice', 'USD', 1000);
 INSERT INTO account (id, name, currency, balance) VALUES (2, 'Bob', 'JPN', 500);

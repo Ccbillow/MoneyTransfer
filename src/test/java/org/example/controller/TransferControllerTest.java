@@ -1,6 +1,5 @@
 package org.example.controller;
 
-import jakarta.transaction.Transactional;
 import org.example.BaseTest;
 import org.example.comm.enums.Currency;
 import org.example.comm.enums.ExceptionEnum;
@@ -10,13 +9,12 @@ import org.example.params.req.TransferRequest;
 import org.example.params.resp.CommonResponse;
 import org.example.repository.AccountRepository;
 import org.example.repository.FxRateRepository;
+import org.example.repository.TransferLogRepository;
 import org.example.util.JsonUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
@@ -25,11 +23,14 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -56,8 +57,8 @@ public class TransferControllerTest extends BaseTest {
     @Autowired
     private FxRateRepository fxRateRepository;
 
-    @MockBean
-    private CommandLineRunner myDataInitializer;
+    @Autowired
+    private TransferLogRepository transferLogRepository;
 
     @Test
     public void testTransfer_USD_From_Alice_To_Bob_Fail() throws Exception {
@@ -171,6 +172,8 @@ public class TransferControllerTest extends BaseTest {
         CommonResponse<Void> response = JsonUtils.fromJson(content, CommonResponse.class);
 
         assertNotNull(response);
+        assertNotNull(transferLogRepository.findAll());
+        assertEquals(1, transferLogRepository.findAll().size());
 
         // verify balance
         verifyBalance(1L, BigDecimal.valueOf(949.50));
@@ -225,53 +228,144 @@ public class TransferControllerTest extends BaseTest {
         assertEquals("Sender must use base currency.", r3.getErrorMsg());
     }
 
+    /**
+     * Test Concurrent
+     *
+     * Condition
+     *      tasks: 10
+     *      concurrent:3
+     *      retry:3
+     *
+     * Result: all tasks success
+     */
     @Test
-    public void testConcurrentTransfer_OptimisticLockException() throws Exception {
+    public void testConcurrentTransfer_Retry_Success() throws Exception {
         setup("testdata/accounts_test_one.json", "testdata/rate_test_one.json");
-        ExecutorService executor = Executors.newFixedThreadPool(3);
+        final Random random = new Random();
+        int concurrent = 10;
 
-        List<Callable<CommonResponse<Void>>> tasks = List.of(
-                // Transfer 20 AUD from Bob to Alice
-                () -> send(1L, 2L, 20, Currency.USD),
-                // Transfer money from 40 USD  Alice to bob
-                () -> send(1L, 2L, 40, Currency.USD),
-                // Transfer money from 40 CNY  Alice to bob
-                () -> send(1L, 2L, 60, Currency.USD),
-                () -> send(1L, 2L, 10, Currency.USD),
-                () -> send(1L, 2L, 20, Currency.USD),
-                () -> send(1L, 2L, 1, Currency.USD),
-                () -> send(1L, 2L, 1, Currency.USD),
-                () -> send(1L, 2L, 1, Currency.USD),
-                () -> send(1L, 2L, 1, Currency.USD),
-                () -> send(1L, 2L, 1, Currency.USD)
-        );
+        ExecutorService executor = Executors.newFixedThreadPool(3);
+        List<Callable<CommonResponse<Void>>> tasks = IntStream.range(0, concurrent)
+                .mapToObj(i -> randomTransferTask(random))
+                .collect(Collectors.toList());
 
         List<Future<CommonResponse<Void>>> futures = executor.invokeAll(tasks);
         executor.shutdown();
         executor.awaitTermination(5, TimeUnit.SECONDS);
 
         int successCount = 0;
-        int optimisticLockFailureCount = 0;
+        int optimisticLockMaxRetryFailureCount = 0;
         for (Future<CommonResponse<Void>> future : futures) {
             CommonResponse<Void> response = future.get();
+            System.out.println("concurrent response:" + JsonUtils.toJson(response));
             if (response.isSuccess()) {
                 successCount++;
-            } else if (ExceptionEnum.OPTIMISTIC_LOCK_ERROR.getErrorCode().equals(response.getErrorCode())) {
-                optimisticLockFailureCount++;
+            } else if (ExceptionEnum.OPTIMISTIC_LOCK_MAX_RETRY_ERROR.getErrorCode().equals(response.getErrorCode())) {
+                System.out.println(Thread.currentThread().getName() + " max retry error response:" + JsonUtils.toJson(response));
+                optimisticLockMaxRetryFailureCount++;
             } else {
                 Assert.fail("Unexpected response code: " + response.getErrorMsg());
             }
         }
 
-        assertEquals(10,successCount + optimisticLockFailureCount);
-        assertTrue(optimisticLockFailureCount > 0, "Expected some optimistic lock failures");
+        assertEquals(concurrent, successCount + optimisticLockMaxRetryFailureCount);
+        assertEquals(successCount, concurrent);
+    }
+
+    /**
+     * Test Concurrent
+     *
+     * Condition
+     *      tasks: 10
+     *      concurrent:10
+     *      retry:3
+     *
+     * Result: some tasks success, some tasks fail
+     */
+    @Test
+    public void testConcurrentTransfer_Retry_Fail() throws Exception {
+        setup("testdata/accounts_test_one.json", "testdata/rate_test_one.json");
+        final Random random = new Random();
+        int concurrent = 10;
+
+        ExecutorService executor = Executors.newFixedThreadPool(10);
+        List<Callable<CommonResponse<Void>>> tasks = IntStream.range(0, concurrent)
+                .mapToObj(i -> randomTransferTask(random))
+                .collect(Collectors.toList());
+
+        List<Future<CommonResponse<Void>>> futures = executor.invokeAll(tasks);
+        executor.shutdown();
+        executor.awaitTermination(5, TimeUnit.SECONDS);
+
+        int successCount = 0;
+        int optimisticLockMaxRetryFailureCount = 0;
+        for (Future<CommonResponse<Void>> future : futures) {
+            CommonResponse<Void> response = future.get();
+            System.out.println("concurrent response:" + JsonUtils.toJson(response));
+            if (response.isSuccess()) {
+                successCount++;
+            } else if (ExceptionEnum.OPTIMISTIC_LOCK_MAX_RETRY_ERROR.getErrorCode().equals(response.getErrorCode())) {
+                System.out.println(Thread.currentThread().getName() + " max retry error response:" + JsonUtils.toJson(response));
+                optimisticLockMaxRetryFailureCount++;
+            } else {
+                Assert.fail("Unexpected response code: " + response.getErrorMsg());
+            }
+        }
+
+        assertEquals(concurrent, successCount + optimisticLockMaxRetryFailureCount);
         assertTrue(successCount > 0, "Expected some successful transfers");
+        assertTrue(optimisticLockMaxRetryFailureCount > 0, "Expected max retry fail transfers");
+    }
+
+    /**
+     * Test High Concurrent
+     *
+     * Condition
+     *      tasks: 200
+     *      concurrent:200
+     *      retry:3
+     *
+     * Result: some tasks success, some tasks fail
+     */
+    @Test
+    public void testConcurrentTransfer_Retry_Fail_High_Concurrent() throws Exception {
+        setup("testdata/accounts_test_one.json", "testdata/rate_test_one.json");
+        final Random random = new Random();
+        int concurrent = 200;
+
+        ExecutorService executor = Executors.newFixedThreadPool(concurrent);
+        List<Callable<CommonResponse<Void>>> tasks = IntStream.range(0, concurrent)
+                .mapToObj(i -> randomTransferTask(random))
+                .toList();
+
+        List<Future<CommonResponse<Void>>> futures = executor.invokeAll(tasks);
+        executor.shutdown();
+        executor.awaitTermination(5, TimeUnit.SECONDS);
+
+        int successCount = 0;
+        int optimisticLockMaxRetryFailureCount = 0;
+        for (Future<CommonResponse<Void>> future : futures) {
+            CommonResponse<Void> response = future.get();
+            System.out.println("concurrent response:" + JsonUtils.toJson(response));
+            if (response.isSuccess()) {
+                successCount++;
+            } else if (ExceptionEnum.OPTIMISTIC_LOCK_MAX_RETRY_ERROR.getErrorCode().equals(response.getErrorCode())) {
+                optimisticLockMaxRetryFailureCount++;
+            } else {
+                Assert.fail("Unexpected response code: " + response.getErrorMsg());
+            }
+        }
+
+        assertEquals(concurrent, successCount + optimisticLockMaxRetryFailureCount);
+        assertTrue(successCount > 0, "Expected some successful transfers");
+        assertTrue(optimisticLockMaxRetryFailureCount > 0, "Expected max retry fail transfers");
     }
 
     public void setup(String accountPath, String ratePath) {
         // del old data
         accountRepository.deleteAllAccountsNative();
         fxRateRepository.deleteAll();
+        transferLogRepository.deleteAll();
 
         // load new data
         List<Account> accounts = JsonUtils.fromPathToObjList(accountPath, Account.class);
@@ -303,5 +397,9 @@ public class TransferControllerTest extends BaseTest {
     private void verifyBalance(Long accountId, BigDecimal expectedBalances) {
         accountRepository.findById(accountId).ifPresent(account ->
                 assertEquals(0, account.getBalance().compareTo(expectedBalances)));
+    }
+
+    private Callable<CommonResponse<Void>> randomTransferTask(Random random) {
+        return () -> send(1L, 2L, 1 + random.nextInt(5), Currency.USD);
     }
 }

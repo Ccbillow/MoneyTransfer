@@ -7,17 +7,21 @@ import org.example.comm.BaseConstant;
 import org.example.comm.enums.Currency;
 import org.example.comm.enums.ExceptionEnum;
 import org.example.exception.BusinessException;
+import org.example.executor.OptimisticRetryExecutor;
 import org.example.model.Account;
 import org.example.model.FxRate;
+import org.example.model.TransferLog;
 import org.example.params.req.TransferRequest;
 import org.example.repository.AccountRepository;
 import org.example.repository.FxRateRepository;
+import org.example.repository.TransferLogRepository;
 import org.example.service.impl.TransferService;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Optional;
 
 @Service
@@ -30,10 +34,36 @@ public class TransferServiceImpl implements TransferService {
     @Autowired
     private FxRateRepository fxRateRepository;
 
+    @Autowired
+    private TransferLogRepository transferLogRepository;
+
+    @Autowired
+    private OptimisticRetryExecutor retryExecutor;
+
+//    @Autowired
+//    private RedisLockExecutor redisLockExecutor;
+
     @Override
-    @Transactional
     public void transfer(TransferRequest request) {
+//        String lockKey = String.format("transfer-lock:%d-%d",
+//                Math.min(request.getFromId(), request.getToId()),
+//                Math.max(request.getFromId(), request.getToId()));
+//        redisLockExecutor.executeWithLock(lockKey,
+//                5,
+//                10,
+//                () -> retryExecutor.executeWithRetry(() -> doTransfer(request)));
+
+        retryExecutor.executeWithRetry(() -> doTransfer(request));
+    }
+
+    @Transactional
+    public void doTransfer(TransferRequest request) {
         String traceId = MDC.get("traceId");
+        if (request.getFromId().equals(request.getToId())) {
+            log.error("traceId:{}, same account transfer not allowed, from:[{}], to:[{}]",
+                    traceId, request.getFromId(), request.getToId());
+            throw new BusinessException(ExceptionEnum.PARAM_ILLEGAL.getErrorCode(), "same account transfer not allowed");
+        }
         Account from = accountRepository.findById(request.getFromId()).orElseThrow(() -> {
             log.error("traceId:{}, sender account not exist, from:[{}]", traceId, request.getFromId());
             return new BusinessException(ExceptionEnum.USER_NOT_EXIST.getErrorCode(), "from account not exist");
@@ -59,7 +89,11 @@ public class TransferServiceImpl implements TransferService {
             return;
         }
 
-        // 3. check exchange rate
+        /*
+            3. check exchange rate
+                3.1 not exist, can't transfer
+                3.1 exist, from -> fromCurrency(USD) -> fxRate(USD->JPN) -> toCurrency(JPN) -> to
+         */
         Optional<FxRate> fxRate = fxRateRepository.findByFromCurrencyAndToCurrency(from.getCurrency(), to.getCurrency());
         if (fxRate.isEmpty()) {
             log.error("traceId:{}, receiver:[{}] doesn't support:[{}], and no existing rate support, toCurrency:[{}]",
@@ -79,8 +113,8 @@ public class TransferServiceImpl implements TransferService {
      * @param fxRate        money exchange rate
      */
     private void performTransfer(Account from, Account to, BigDecimal requestAmount, BigDecimal fxRate, String traceId) {
-        BigDecimal fee = requestAmount.multiply(BigDecimal.valueOf(BaseConstant.FEE_RATE));
-        BigDecimal totalDeduct = requestAmount.add(fee);
+        BigDecimal fee = requestAmount.multiply(BigDecimal.valueOf(BaseConstant.FEE_RATE)).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal totalDeduct = requestAmount.add(fee).setScale(2, RoundingMode.HALF_UP);
 
         // 1. check balance
         if (from.getBalance().compareTo(totalDeduct) < 0) {
@@ -93,7 +127,7 @@ public class TransferServiceImpl implements TransferService {
         from.setBalance(from.getBalance().subtract(totalDeduct));
 
         // 3. rate exchange
-        BigDecimal convertedAmount = requestAmount.multiply(fxRate);
+        BigDecimal convertedAmount = requestAmount.multiply(fxRate).setScale(2, RoundingMode.HALF_UP);
 
         // 4. add to balance
         to.setBalance(to.getBalance().add(convertedAmount));
@@ -103,5 +137,16 @@ public class TransferServiceImpl implements TransferService {
         // todo async, send to message queue
         accountRepository.save(from);
         accountRepository.save(to);
+
+        // 6. save log
+        TransferLog transferLog = new TransferLog();
+        transferLog.setFromAccountId(from.getId());
+        transferLog.setFromCurrency(from.getCurrency());
+        transferLog.setToAccountId(to.getId());
+        transferLog.setToCurrency(to.getCurrency());
+        transferLog.setAmount(requestAmount);
+        transferLog.setFee(fee);
+        transferLog.setFxRate(fxRate);
+        transferLogRepository.save(transferLog);
     }
 }
