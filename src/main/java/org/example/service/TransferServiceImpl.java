@@ -92,7 +92,7 @@ public class TransferServiceImpl implements TransferService {
         /*
             3. check exchange rate
                 3.1 not exist, can't transfer
-                3.1 exist, from -> fromCurrency(USD) -> fxRate(USD->JPN) -> toCurrency(JPN) -> to
+                3.1 exist, transfer
          */
         Optional<FxRate> fxRate = fxRateRepository.findByFromCurrencyAndToCurrency(from.getCurrency(), to.getCurrency());
         if (fxRate.isEmpty()) {
@@ -106,6 +106,12 @@ public class TransferServiceImpl implements TransferService {
 
     /**
      * transfer
+     *
+     * same currency:
+     *      from -> fromCurrency(USD) -> toCurrency(JPN) -> to
+     *
+     * diff currency:
+     *      from -> fromCurrency(USD) -> fxRate(USD->JPN) -> toCurrency(JPN) -> to
      *
      * @param from          source account
      * @param to            target account

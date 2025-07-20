@@ -313,25 +313,24 @@ public class TransferControllerTest extends BaseTest {
         }
 
         assertEquals(concurrent, successCount + optimisticLockMaxRetryFailureCount);
-        assertTrue(successCount > 0, "Expected some successful transfers");
-        assertTrue(optimisticLockMaxRetryFailureCount > 0, "Expected max retry fail transfers");
+        assertEquals(successCount, concurrent);
     }
 
     /**
      * Test High Concurrent
      *
      * Condition
-     *      tasks: 200
-     *      concurrent:200
+     *      tasks: 500
+     *      concurrent:500
      *      retry:3
      *
      * Result: some tasks success, some tasks fail
      */
     @Test
     public void testConcurrentTransfer_Retry_Fail_High_Concurrent() throws Exception {
-        setup("testdata/accounts_test_one.json", "testdata/rate_test_one.json");
+        setup("testdata/accounts_test_hign_concurrent.json", "testdata/rate_test_high_concurrent.json");
         final Random random = new Random();
-        int concurrent = 200;
+        int concurrent = 500;
 
         ExecutorService executor = Executors.newFixedThreadPool(concurrent);
         List<Callable<CommonResponse<Void>>> tasks = IntStream.range(0, concurrent)
