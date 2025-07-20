@@ -268,10 +268,9 @@ public class TransferControllerTest extends BaseTest {
         assertTrue(successCount > 0, "Expected some successful transfers");
     }
 
-    @Transactional
-    void setup(String accountPath, String ratePath) {
+    public void setup(String accountPath, String ratePath) {
         // del old data
-        accountRepository.deleteAll();
+        accountRepository.deleteAllAccountsNative();
         fxRateRepository.deleteAll();
 
         // load new data
