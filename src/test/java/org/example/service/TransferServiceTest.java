@@ -17,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
@@ -72,7 +74,7 @@ public class TransferServiceTest extends BaseTest {
         request.setTransferCurrency(Currency.USD);
         request.setAmount(BigDecimal.ONE);
 
-        when(accountRepository.findById(1L)).thenReturn(Optional.ofNullable(null));
+        when(accountRepository.findAllById(List.of(1L, 2L))).thenReturn(new ArrayList<>());
         BusinessException ex = assertThrows(
                 BusinessException.class,
                 () -> transferService.transfer(request)
@@ -96,9 +98,7 @@ public class TransferServiceTest extends BaseTest {
         from.setCurrency(Currency.USD);
         from.setBalance(BigDecimal.valueOf(1000));
 
-        when(accountRepository.findById(1L)).thenReturn(Optional.of(from));
-        when(accountRepository.findById(2L)).thenReturn(Optional.ofNullable(null));
-
+        when(accountRepository.findAllById(List.of(1L, 2L))).thenReturn(List.of(from));
         BusinessException ex = assertThrows(
                 BusinessException.class,
                 () -> transferService.transfer(request)
@@ -128,9 +128,7 @@ public class TransferServiceTest extends BaseTest {
         to.setCurrency(Currency.JPN);
         to.setBalance(BigDecimal.valueOf(500));
 
-        when(accountRepository.findById(1L)).thenReturn(Optional.of(from));
-        when(accountRepository.findById(2L)).thenReturn(Optional.of(to));
-
+        when(accountRepository.findAllById(List.of(1L, 2L))).thenReturn(List.of(from, to));
         BusinessException ex = assertThrows(
                 BusinessException.class,
                 () -> transferService.transfer(request)
@@ -159,9 +157,7 @@ public class TransferServiceTest extends BaseTest {
         to.setCurrency(Currency.USD);
         to.setBalance(BigDecimal.valueOf(500));
 
-        when(accountRepository.findById(1L)).thenReturn(Optional.of(from));
-        when(accountRepository.findById(2L)).thenReturn(Optional.of(to));
-
+        when(accountRepository.findAllById(List.of(1L, 2L))).thenReturn(List.of(from, to));
         BusinessException ex = assertThrows(
                 BusinessException.class,
                 () -> transferService.transfer(request)
@@ -191,8 +187,7 @@ public class TransferServiceTest extends BaseTest {
         to.setCurrency(Currency.USD);
         to.setBalance(BigDecimal.valueOf(500));
 
-        when(accountRepository.findById(1L)).thenReturn(Optional.of(from));
-        when(accountRepository.findById(2L)).thenReturn(Optional.of(to));
+        when(accountRepository.findAllById(List.of(1L, 2L))).thenReturn(List.of(from, to));
         when(accountRepository.save(any())).thenReturn(null);
 
         transferService.transfer(request);
@@ -221,8 +216,7 @@ public class TransferServiceTest extends BaseTest {
         to.setCurrency(Currency.JPN);
         to.setBalance(BigDecimal.valueOf(500));
 
-        when(accountRepository.findById(1L)).thenReturn(Optional.of(from));
-        when(accountRepository.findById(2L)).thenReturn(Optional.of(to));
+        when(accountRepository.findAllById(List.of(1L, 2L))).thenReturn(List.of(from, to));
         when(fxRateRepository.findByFromCurrencyAndToCurrency(Currency.USD, Currency.JPN))
                 .thenReturn(Optional.ofNullable(null));
 
@@ -261,8 +255,7 @@ public class TransferServiceTest extends BaseTest {
         rate.setToCurrency(Currency.AUD);
         rate.setRate(BigDecimal.valueOf(2));
 
-        when(accountRepository.findById(1L)).thenReturn(Optional.of(from));
-        when(accountRepository.findById(2L)).thenReturn(Optional.of(to));
+        when(accountRepository.findAllById(List.of(1L, 2L))).thenReturn(List.of(from, to));
         when(fxRateRepository.findByFromCurrencyAndToCurrency(Currency.USD, Currency.AUD))
                 .thenReturn(Optional.of(rate));
 
@@ -300,9 +293,8 @@ public class TransferServiceTest extends BaseTest {
         rate.setFromCurrency(Currency.USD);
         rate.setToCurrency(Currency.AUD);
         rate.setRate(BigDecimal.valueOf(2));
-        when(accountRepository.findById(1L)).thenReturn(Optional.of(from));
-        when(accountRepository.findById(2L)).thenReturn(Optional.of(to));
 
+        when(accountRepository.findAllById(List.of(1L, 2L))).thenReturn(List.of(from, to));
         when(fxRateRepository.findByFromCurrencyAndToCurrency(Currency.USD, Currency.AUD))
                 .thenReturn(Optional.of(rate));
 
