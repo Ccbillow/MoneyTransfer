@@ -41,7 +41,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
  * transfer controller test
  */
 @AutoConfigureMockMvc
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class TransferControllerTest extends BaseTest {
 
     private final static String DEFAULT_ACCOUNR_PARH = "testdata/accounts_default.json";
@@ -86,13 +85,13 @@ public class TransferControllerTest extends BaseTest {
         setup(DEFAULT_ACCOUNR_PARH, DEFAULT_RATE_PARH);
 
         List<CommonResponse<Void>> responses = new ArrayList<>();
-        for (int i = 0; i < 20; i++) {
-            TransferRequest request = new TransferRequest();
-            request.setFromId(2L);
-            request.setToId(1L);
-            request.setTransferCurrency(Currency.USD);
-            request.setAmount(BigDecimal.valueOf(50));
+        TransferRequest request = new TransferRequest();
+        request.setFromId(2L);
+        request.setToId(1L);
+        request.setTransferCurrency(Currency.USD);
+        request.setAmount(BigDecimal.valueOf(50));
 
+        for (int i = 0; i < 20; i++) {
             String content = mockMvc.perform(post(TRANSFER_URL)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(Objects.requireNonNull(JsonUtils.toJson(request))))
@@ -382,6 +381,73 @@ public class TransferControllerTest extends BaseTest {
         assertEquals(concurrent, successCount + optimisticLockMaxRetryFailureCount);
         assertTrue(successCount > 0, "Expected some successful transfers");
         assertTrue(optimisticLockMaxRetryFailureCount > 0, "Expected max retry fail transfers");
+    }
+
+    @Test
+    public void testCircuitBreakerOpenState() throws Exception{
+        setup(DEFAULT_ACCOUNR_PARH, DEFAULT_RATE_PARH);
+
+        List<CommonResponse<Void>> responses = new ArrayList<>();
+        TransferRequest request = new TransferRequest();
+        request.setFromId(2L);
+        request.setToId(1L);
+        request.setTransferCurrency(Currency.USD);
+        request.setAmount(BigDecimal.valueOf(50));
+
+        for (int i = 0; i < 21; i++) {
+            String content = mockMvc.perform(post(TRANSFER_URL)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(Objects.requireNonNull(JsonUtils.toJson(request))))
+                    .andReturn().getResponse().getContentAsString();
+            CommonResponse<Void> response = JsonUtils.fromJson(content, CommonResponse.class);
+            responses.add(response);
+        }
+
+        assertEquals(21, responses.size());
+
+
+        assertTrue(responses.stream()
+                .anyMatch(r -> ExceptionEnum.CIRCUIT_OPEN.getErrorCode().equals(r.getErrorCode())
+                        && ExceptionEnum.CIRCUIT_OPEN.getErrorMsg().equals(r.getErrorMsg())));
+    }
+
+    @Test
+    public void testRateLimiter() throws Exception {
+        setup("testdata/accounts_test_hign_concurrent.json", "testdata/rate_test_high_concurrent.json");
+        final Random random = new Random();
+        int concurrent = 1100;
+
+        ExecutorService executor = Executors.newFixedThreadPool(concurrent);
+        List<Callable<CommonResponse<Void>>> tasks = IntStream.range(0, concurrent)
+                .mapToObj(i -> randomTransferTask(random))
+                .toList();
+
+        List<Future<CommonResponse<Void>>> futures = executor.invokeAll(tasks);
+        executor.shutdown();
+        executor.awaitTermination(5, TimeUnit.SECONDS);
+
+        int successCount = 0;
+        int optimisticLockMaxRetryFailureCount = 0;
+        int rateLimitRejectCount = 0;
+        for (Future<CommonResponse<Void>> future : futures) {
+            CommonResponse<Void> response = future.get();
+            if (response.isSuccess()) {
+                successCount++;
+            } else if (ExceptionEnum.OPTIMISTIC_LOCK_MAX_RETRY_ERROR.getErrorCode().equals(response.getErrorCode())) {
+                optimisticLockMaxRetryFailureCount++;
+            } else if (ExceptionEnum.RATE_LIMIT_EXCEEDED.getErrorCode().equals(response.getErrorCode())) {
+                rateLimitRejectCount++;
+            } else {
+                Assert.fail("Unexpected response code: " + response.getErrorMsg());
+            }
+        }
+
+        System.out.println("successCount : " + successCount);
+        System.out.println("rateLimitRejectCount : " + rateLimitRejectCount);
+        System.out.println("optimisticLockMaxRetryFailureCount : " + optimisticLockMaxRetryFailureCount);
+        assertEquals(concurrent, successCount + rateLimitRejectCount + optimisticLockMaxRetryFailureCount);
+        assertTrue(successCount > 0, "Expected some successful transfers");
+        assertTrue(rateLimitRejectCount > 0, "Expected max retry fail transfers");
     }
 
     public void setup(String accountPath, String ratePath) {

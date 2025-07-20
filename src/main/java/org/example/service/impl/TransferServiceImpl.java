@@ -6,7 +6,9 @@ import org.apache.logging.log4j.Logger;
 import org.example.comm.BaseConstant;
 import org.example.comm.enums.ExceptionEnum;
 import org.example.exception.BusinessException;
+import org.example.executor.CircuitBreakerExecutor;
 import org.example.executor.OptimisticRetryExecutor;
+import org.example.executor.RateLimiterExecutor;
 import org.example.model.Account;
 import org.example.model.FxRate;
 import org.example.model.TransferLog;
@@ -44,6 +46,12 @@ public class TransferServiceImpl implements TransferService {
     @Autowired
     private OptimisticRetryExecutor retryExecutor;
 
+    @Autowired
+    private CircuitBreakerExecutor circuitBreakerExecutor;
+
+    @Autowired
+    private RateLimiterExecutor rateLimiterExecutor;
+
 //    @Autowired
 //    private RedisLockExecutor redisLockExecutor;
 //
@@ -62,7 +70,11 @@ public class TransferServiceImpl implements TransferService {
 //                    () -> retryExecutor.executeWithRetry(() -> doTransfer(request)));
 //        });
 
-        retryExecutor.executeWithRetry(() -> doTransfer(request));
+        rateLimiterExecutor.execute(() ->
+                circuitBreakerExecutor.execute(() ->
+                        retryExecutor.executeWithRetry(() ->
+                                doTransfer(request))));
+
     }
 
     @Transactional

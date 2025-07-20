@@ -13,3 +13,19 @@ spring:
     console:
       enabled: true
       path: /h2-console
+
+resilience4j:
+  ratelimiter:
+    instances:
+      transferRateLimiter:
+        limitForPeriod: 1000    # Allow 1000 calls per refresh period
+        limitRefreshPeriod: 1s  # Reset the limit every 1 second
+        timeoutDuration: 0      # Do not wait for permission, immediately reject excess calls
+
+  circuitbreaker:
+    instances:
+      transferCircuitBreaker:
+        slidingWindowSize: 50         # Track the outcome of the last 50 calls
+        minimumNumberOfCalls: 20      # Minimum 10 calls must be made before calculating failure rate
+        failureRateThreshold: 50      # If 50% or more calls fail, open the circuit
+        waitDurationInOpenState: 15s  # Keep the circuit open for 10 seconds before transitioning to half-open

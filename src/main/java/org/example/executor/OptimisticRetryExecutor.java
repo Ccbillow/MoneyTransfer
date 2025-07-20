@@ -44,7 +44,8 @@ public class OptimisticRetryExecutor {
                 retry++;
                 if (retry > maxRetries) {
                     //todo 1. save to error table; 2. send email to developer
-                    throw new BusinessException(ExceptionEnum.OPTIMISTIC_LOCK_MAX_RETRY_ERROR.getErrorCode(), ExceptionEnum.OPTIMISTIC_LOCK_MAX_RETRY_ERROR.getErrorMsg());
+                    throw new BusinessException(ExceptionEnum.OPTIMISTIC_LOCK_MAX_RETRY_ERROR.getErrorCode(),
+                            ExceptionEnum.OPTIMISTIC_LOCK_MAX_RETRY_ERROR.getErrorMsg());
                 }
 
                 try {
