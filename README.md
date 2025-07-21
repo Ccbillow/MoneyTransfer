@@ -139,8 +139,8 @@ Ensure you have Java 17 and Maven installed.
 
 ## Concurrency Strategy
 
-- Optimistic locking (via @Version field in JPA).
-- Random wait time to retry, reduce lock contention.
+- **Optimistic locking** (via @Version field in JPA).
+- **Random wait time** to retry, reduce lock contention.
 - Redis-based distributed lock (if externalized).
 
 ## High-Availability Strategy
