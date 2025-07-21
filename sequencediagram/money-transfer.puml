@@ -1,0 +1,72 @@
+@startuml
+actor Client
+participant TransferService
+participant IdempotentExecutor
+participant RateLimiterExecutor
+participant CircuitBreakerExecutor
+participant OptimisticRetryExecutor
+participant AccountRepository
+participant TransferHandler <<interface>>
+participant "SameCurrencyTransferHandler" as SameHandler
+participant "DiffCurrencyTransferHandler" as DiffHandler
+participant FxRateRepository
+participant TransferLogRepository
+
+Client -> TransferService : transfer(request)
+activate TransferService
+
+TransferService -> IdempotentExecutor : execute(requestId, task)
+activate IdempotentExecutor
+
+IdempotentExecutor -> RateLimiterExecutor : execute(task)
+activate RateLimiterExecutor
+
+RateLimiterExecutor -> CircuitBreakerExecutor : execute(task)
+activate CircuitBreakerExecutor
+
+CircuitBreakerExecutor -> OptimisticRetryExecutor : executeWithRetry(task)
+activate OptimisticRetryExecutor
+
+OptimisticRetryExecutor -> TransferService : doTransfer(request)
+activate TransferService
+
+TransferService -> AccountRepository : findAllById([fromId, toId])
+AccountRepository --> TransferService : [fromAccount, toAccount]
+
+alt Same currency
+    TransferService -> SameHandler : transfer(from, to, amount)
+    activate SameHandler
+    SameHandler -> AccountRepository : save(from)
+    SameHandler -> AccountRepository : save(to)
+    SameHandler -> TransferLogRepository : save(log)
+    deactivate SameHandler
+else Different currency
+    TransferService -> FxRateRepository : getRate(...)
+    FxRateRepository --> TransferService : rate
+
+    TransferService -> DiffHandler : transfer(from, to, amount, rate)
+    activate DiffHandler
+    DiffHandler -> AccountRepository : save(from)
+    DiffHandler -> AccountRepository : save(to)
+    DiffHandler -> TransferLogRepository : save(log)
+    deactivate DiffHandler
+end
+
+TransferService --> OptimisticRetryExecutor : void
+deactivate TransferService
+
+OptimisticRetryExecutor --> CircuitBreakerExecutor : void
+deactivate OptimisticRetryExecutor
+
+CircuitBreakerExecutor --> RateLimiterExecutor : void
+deactivate CircuitBreakerExecutor
+
+RateLimiterExecutor --> IdempotentExecutor : void
+deactivate RateLimiterExecutor
+
+IdempotentExecutor --> TransferService : void
+deactivate IdempotentExecutor
+
+TransferService --> Client : OK
+deactivate TransferService
+@enduml

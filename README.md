@@ -80,6 +80,8 @@ src/
         ├── testdata/
         └── application-test.yml
 ```
+## Money Transfer Sequence Diagram
+![Money Transfer](![money-transfer.png](sequencediagram%2Fmoney-transfer.png))
 
 ## How to Run
 
@@ -214,5 +216,7 @@ All performance tests are based on **same-currency transfers**. The following sc
 - Use **Global TradeId** to track
 - Integrate **MessageQueue** to async transfer
 - Real user **authentication / authorization** (SpringSecurity+JWT)
+- Use **SpringCloud** as microservices
+- Integrate **CI/CD** (Jenkins/Github Actions)
 
 ---
