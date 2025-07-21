@@ -81,7 +81,7 @@ src/
         └── application-test.yml
 ```
 ## Money Transfer Sequence Diagram
-![Money Transfer](![money-transfer.png](sequencediagram%2Fmoney-transfer.png))
+![Money Transfer](sequencediagram/money-transfer.png)
 
 ## How to Run
 
