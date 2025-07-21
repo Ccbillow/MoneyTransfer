@@ -16,6 +16,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
@@ -48,6 +49,7 @@ public class TransferServiceTest extends BaseServiceTest {
     @Test
     public void testTransferSameUser_Fail() {
         TransferRequest request = new TransferRequest();
+        request.setRequestId(UUID.randomUUID().toString().replace("-", ""));
         request.setFromId(1L);
         request.setToId(1L);
         request.setTransferCurrency(Currency.USD);
@@ -65,6 +67,7 @@ public class TransferServiceTest extends BaseServiceTest {
     @Test
     public void testTransferFromNotExist_Fail() {
         TransferRequest request = new TransferRequest();
+        request.setRequestId(UUID.randomUUID().toString().replace("-", ""));
         request.setFromId(1L);
         request.setToId(2L);
         request.setTransferCurrency(Currency.USD);
@@ -83,6 +86,7 @@ public class TransferServiceTest extends BaseServiceTest {
     @Test
     public void testTransferToNotExist_Fail() {
         TransferRequest request = new TransferRequest();
+        request.setRequestId(UUID.randomUUID().toString().replace("-", ""));
         request.setFromId(1L);
         request.setToId(2L);
         request.setTransferCurrency(Currency.USD);
@@ -107,6 +111,7 @@ public class TransferServiceTest extends BaseServiceTest {
     @Test
     public void testTransferFromCurrencyNotMatch_Fail() {
         TransferRequest request = new TransferRequest();
+        request.setRequestId(UUID.randomUUID().toString().replace("-", ""));
         request.setFromId(1L);
         request.setToId(2L);
         request.setTransferCurrency(Currency.AUD);
@@ -136,6 +141,7 @@ public class TransferServiceTest extends BaseServiceTest {
     @Test
     public void testTransferSameCurrencyInsufficientBalance_Fail() {
         TransferRequest request = new TransferRequest();
+        request.setRequestId(UUID.randomUUID().toString().replace("-", ""));
         request.setFromId(1L);
         request.setToId(2L);
         request.setTransferCurrency(Currency.USD);
@@ -166,6 +172,7 @@ public class TransferServiceTest extends BaseServiceTest {
     @Test
     public void testTransferSameCurrency_Success() {
         TransferRequest request = new TransferRequest();
+        request.setRequestId(UUID.randomUUID().toString().replace("-", ""));
         request.setFromId(1L);
         request.setToId(2L);
         request.setTransferCurrency(Currency.USD);
@@ -195,6 +202,7 @@ public class TransferServiceTest extends BaseServiceTest {
     @Test
     public void testTransferDiffCurrency_Fail() {
         TransferRequest request = new TransferRequest();
+        request.setRequestId(UUID.randomUUID().toString().replace("-", ""));
         request.setFromId(1L);
         request.setToId(2L);
         request.setTransferCurrency(Currency.USD);

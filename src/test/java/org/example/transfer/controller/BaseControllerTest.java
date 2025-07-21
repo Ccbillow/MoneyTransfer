@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 
 import static org.junit.Assert.assertEquals;
@@ -74,6 +75,7 @@ public abstract class BaseControllerTest {
     protected CommonResponse<Void> send(Long fromId, Long toId, double amount, Currency currency) throws Exception {
         try {
             TransferRequest request = new TransferRequest();
+            request.setRequestId(UUID.randomUUID().toString().replace("-", ""));
             request.setFromId(fromId);
             request.setToId(toId);
             request.setAmount(BigDecimal.valueOf(amount));

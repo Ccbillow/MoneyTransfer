@@ -12,8 +12,8 @@ public class TransferRequest {
      * requestId
      * for idempotent check
      */
-//    @NotNull(message = "requestId can not be null")
-//    private String requestId;
+    @NotNull(message = "requestId can not be null")
+    private String requestId;
 
     @NotNull(message = "fromId can not be null")
     private Long fromId;
@@ -31,6 +31,14 @@ public class TransferRequest {
      */
     @NotNull(message = "transferCurrency can not be null")
     private Currency transferCurrency;
+
+    public String getRequestId() {
+        return requestId;
+    }
+
+    public void setRequestId(String requestId) {
+        this.requestId = requestId;
+    }
 
     public Long getFromId() {
         return fromId;

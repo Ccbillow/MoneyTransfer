@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -38,6 +39,7 @@ public class TransferControllerDifferentTransferTypeTest extends BaseControllerT
         setup(DEFAULT_ACCOUNR_PARH, DEFAULT_RATE_PARH);
 
         TransferRequest request = new TransferRequest();
+        request.setRequestId(UUID.randomUUID().toString().replace("-", ""));
         request.setFromId(1L);
         request.setToId(2L);
         request.setTransferCurrency(Currency.USD);
@@ -66,6 +68,7 @@ public class TransferControllerDifferentTransferTypeTest extends BaseControllerT
         request.setAmount(BigDecimal.valueOf(50));
 
         for (int i = 0; i < 20; i++) {
+            request.setRequestId(UUID.randomUUID().toString().replace("-", ""));
             String content = mockMvc.perform(post(TRANSFER_URL)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(Objects.requireNonNull(JsonUtils.toJson(request))))
@@ -133,6 +136,7 @@ public class TransferControllerDifferentTransferTypeTest extends BaseControllerT
         setup("testdata/accounts_test_one.json", "testdata/rate_test_one.json");
 
         TransferRequest request = new TransferRequest();
+        request.setRequestId(UUID.randomUUID().toString().replace("-", ""));
         request.setFromId(1L);
         request.setToId(2L);
         request.setTransferCurrency(Currency.USD);

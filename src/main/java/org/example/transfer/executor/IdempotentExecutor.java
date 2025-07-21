@@ -1,12 +1,53 @@
 package org.example.transfer.executor;
 
 
-//@Component
+import org.example.transfer.comm.enums.ExceptionEnum;
+import org.example.transfer.exception.BusinessException;
+import org.springframework.stereotype.Component;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
+
+@Component
 public class IdempotentExecutor {
 
-//    @Autowired
+    private static Map<String, Boolean> idempotentMap = new ConcurrentHashMap<>();
+
+    public void execute(String requestId, Runnable task) {
+        execute(requestId, () -> {
+            task.run();
+            return null;
+        });
+    }
+
+    /**
+     * Executes idempotent task
+     *
+     * @param requestId idempotent key
+     * @param task      business task
+     * @return business result
+     * @throws BusinessException if duplicate request
+     */
+    public static <T> T execute(String requestId, Supplier<T> task) {
+        boolean isFirst = idempotentMap.putIfAbsent(requestId, Boolean.TRUE) == null;
+        if (!isFirst) {
+            throw new BusinessException(ExceptionEnum.IDEMPOTENT_REQUEST.getErrorCode(),
+                    String.format("Duplicate request, requestId: %s", requestId));
+        }
+
+        try {
+            return task.get();
+        } finally {
+            idempotentMap.remove(requestId);
+        }
+    }
+
+
+    //    @Autowired
 //    private RedissonClient redissonClient;
-//
+
+
 //    /**
 //     * Executes idempotent task (no return)
 //     */

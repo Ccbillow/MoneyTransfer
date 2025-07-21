@@ -18,6 +18,7 @@ import org.springframework.test.context.TestPropertySource;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
@@ -52,6 +53,7 @@ public class TransferServiceDifferentTransferTypeTest extends BaseServiceTest {
     @Test
     public void testTransferNoExistingRate() {
         TransferRequest request = new TransferRequest();
+        request.setRequestId(UUID.randomUUID().toString().replace("-", ""));
         request.setFromId(1L);
         request.setToId(2L);
         request.setTransferCurrency(Currency.USD);
@@ -85,6 +87,7 @@ public class TransferServiceDifferentTransferTypeTest extends BaseServiceTest {
     @Test
     public void testTransferDiffCurrencyInsufficientBalance_Fail() {
         TransferRequest request = new TransferRequest();
+        request.setRequestId(UUID.randomUUID().toString().replace("-", ""));
         request.setFromId(1L);
         request.setToId(2L);
         request.setTransferCurrency(Currency.USD);
@@ -124,6 +127,7 @@ public class TransferServiceDifferentTransferTypeTest extends BaseServiceTest {
     @Test
     public void testTransferDiffCurrency_Success() {
         TransferRequest request = new TransferRequest();
+        request.setRequestId(UUID.randomUUID().toString().replace("-", ""));
         request.setFromId(1L);
         request.setToId(2L);
         request.setTransferCurrency(Currency.USD);

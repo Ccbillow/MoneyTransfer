@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -203,6 +204,7 @@ public class TransferControllerPerformenceTest extends BaseControllerTest {
         request.setAmount(BigDecimal.valueOf(50));
 
         for (int i = 0; i < 21; i++) {
+            request.setRequestId(UUID.randomUUID().toString().replace("-", ""));
             String content = mockMvc.perform(post(TRANSFER_URL)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(Objects.requireNonNull(JsonUtils.toJson(request))))
@@ -254,5 +256,61 @@ public class TransferControllerPerformenceTest extends BaseControllerTest {
         assertTrue(rateLimitRejectCount > 0, "Expected max retry fail transfers");
     }
 
+    /**
+     * Test idempotent behavior: same requestId should only be processed once
+     * <p>
+     * Condition:
+     * - 10 concurrent requests
+     * - Same requestId
+     *
+     * Expected:
+     * - One success
+     * - 9 duplicate error responses
+     */
+    @Test
+    public void testIdempotent_DuplicateRequestRejected() throws Exception {
+        setup("testdata/accounts_test_performance.json", "testdata/rate_test_performance.json");
+        int concurrent = 10;
 
+        String requestId = UUID.randomUUID().toString().replace("-", "");
+        TransferRequest request = new TransferRequest();
+        request.setFromId(1L);
+        request.setToId(2L);
+        request.setTransferCurrency(Currency.USD);
+        request.setAmount(BigDecimal.valueOf(1));
+        request.setRequestId(requestId);
+
+        ExecutorService executor = Executors.newFixedThreadPool(concurrent);
+        List<Callable<CommonResponse<Void>>> tasks = new ArrayList<>();
+        for (int i = 0; i < concurrent; i++) {
+            tasks.add(() -> {
+                String content = mockMvc.perform(post(TRANSFER_URL)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(JsonUtils.toJson(request)))
+                        .andReturn().getResponse().getContentAsString();
+                return JsonUtils.fromJson(content, CommonResponse.class);
+            });
+        }
+
+        List<Future<CommonResponse<Void>>> futures = executor.invokeAll(tasks);
+        executor.shutdown();
+        executor.awaitTermination(5, TimeUnit.SECONDS);
+
+        int successCount = 0;
+        int idempotentErrorCount = 0;
+
+        for (Future<CommonResponse<Void>> future : futures) {
+            CommonResponse<Void> response = future.get();
+            if (response.isSuccess()) {
+                successCount++;
+            } else if (ExceptionEnum.IDEMPOTENT_REQUEST.getErrorCode().equals(response.getErrorCode())) {
+                idempotentErrorCount++;
+            } else {
+                Assert.fail("Unexpected error: " + response.getErrorMsg());
+            }
+        }
+
+        assertEquals(1, successCount);
+        assertEquals(concurrent - 1, idempotentErrorCount);
+    }
 }

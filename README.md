@@ -159,11 +159,12 @@ All scenarios are covered in unit & integration tests under src/test/java. You c
 
 #### If not support Currency conversion
 
-| Scenario Description                                                                                                                                            | Testcase Name                                         | Error Msg                                                                                                                                                 |
-|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 1. Transfer 50 USD to Alice to Bob                                                                                                                              | ```testTransferUSDFromAliceToBob_Fail```              | not support transfer type: DIFFERENT, fromCurrency:USD, toCurrency:JPN                                                                                    |
-| 2. Transfer 50 AUD to Bob to Alice recurring for 20 times                                                                                                       | ```testRepeatTransferAUDFromBobToAlice20Times_Fail``` | Sender must use base currency.                                                                                                                            |
-| 3. Concurrently <br> 3.1. Transfer 20 AUD from Bob to Alice<br> 3.2. Transfer money from 40 USD  Alice to bob<br> 3.3. Transfer money from 40 CNY  Alice to bob | ```testConcurrentTransfer_Fail```                     | 1. Sender must use base currency.<br> 2. not support transfer type: DIFFERENT, fromCurrency:USD, toCurrency:JPN<br> 3. Sender must use base currency.<br> |
+| Scenario Description                                                                                                                                            | Testcase Name                                                      | Error Msg                                                                                                                                                 |
+|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 1. Transfer 50 USD to Alice to Bob                                                                                                                              | ```testTransferUSDFromAliceToBob_Fail```                           | not support transfer type: DIFFERENT, fromCurrency:USD, toCurrency:JPN                                                                                    |
+| 2. Transfer 50 AUD to Bob to Alice recurring for 20 times (diff requestId)                                                                                      | ```testRepeatTransferAUDFromBobToAlice20Times_Fail```              | Sender must use base currency.                                                                                                                            |
+| 2. Transfer 50 AUD to Bob to Alice recurring for 20 times (same requestId)                                                                                      | ```testRepeatTransferAUDFromBobToAliceSameRequestId20Times_Fail``` | 1:Sender must use base currency.<br> 19:duplicate request!                                                                                                |
+| 3. Concurrently <br> 3.1. Transfer 20 AUD from Bob to Alice<br> 3.2. Transfer money from 40 USD  Alice to bob<br> 3.3. Transfer money from 40 CNY  Alice to bob | ```testConcurrentTransfer_Fail```                                  | 1. Sender must use base currency.<br> 2. not support transfer type: DIFFERENT, fromCurrency:USD, toCurrency:JPN<br> 3. Sender must use base currency.<br> |
 
 #### If support Currency conversion
 
@@ -179,14 +180,15 @@ All scenarios are covered in unit & integration tests under src/test/java. You c
 
 All performance tests are based on **same-currency transfers**. The following scenarios are tested:
 
-| Scenario Description               | Testcase Name                                | Result                                             |
-|------------------------------------|----------------------------------------------|----------------------------------------------------|
-| 1. Concurrent transfers            | ```testConcurrentTransferMoney_Success```    | final balances are correct                         |
-| 2. Low concurrency (5 threads)     | ```testLowConcurrentTransferRetry_Success``` | all transfers succeed after retries                |
-| 3. Medium concurrency (50 threads) | ```testMidConcurrentTransferRetry_Success``` | all transfers succeed after retries                |
-| 4. High concurrency (1000 threads) | ```testHighConcurrentTransferRetry_Fail```   | some transfers fail after exceeding 3 retries      |
-| 5. Circuit breaker                 | ```testCircuitBreakerOpenState```            | Circuit breaker triggers successfully              |
-| 6. Rate limiter                    | ```testRateLimiter```                        | Rate limiter blocks excessive requests as expected |
+| Scenario Description               | Testcase Name                                 | Result                                             |
+|------------------------------------|-----------------------------------------------|----------------------------------------------------|
+| 1. Concurrent transfers            | ```testConcurrentTransferMoney_Success```     | final balances are correct                         |
+| 2. Low concurrency (5 threads)     | ```testLowConcurrentTransferRetry_Success```  | all transfers succeed after retries                |
+| 3. Medium concurrency (50 threads) | ```testMidConcurrentTransferRetry_Success```  | all transfers succeed after retries                |
+| 4. High concurrency (1000 threads) | ```testHighConcurrentTransferRetry_Fail```    | some transfers fail after exceeding 3 retries      |
+| 5. Circuit breaker                 | ```testCircuitBreakerOpenState```             | Circuit breaker triggers successfully              |
+| 6. Rate limiter                    | ```testRateLimiter```                         | Rate limiter blocks excessive requests as expected |
+| 6. Idempotent                      | ```testIdempotent_DuplicateRequestRejected``` | Same requestId, only one can success               |
 
 ### Assumptions Made
 
@@ -201,16 +203,16 @@ All performance tests are based on **same-currency transfers**. The following sc
 ### Possible Enhancements
 
 - Separate Account to User+Account
-- Get FxRate from external service or Redis
-- Integrate Redis
+- Get FxRate from **external service** or **Redis**
+- Integrate **Redis**
     - Distributed Lock (RedisLockExecutor.java)
     - Idempotent request execution (IdempotentExecutor.java)
-- Integrate ConfigCenter to maintain config (DEFAULT_MAX_RETRIES, FEE_RATE)
+- Integrate **ConfigCenter** to maintain config (DEFAULT_MAX_RETRIES, FEE_RATE)
 - Save request to DB after all retry times fail and send email to developer
-- Replace H2 with PostgreSQL or MySQL for persistence
-- Add Swagger UI for API docs
-- Use Global TradeId to track
-- Integrate MessageQueue to async transfer
-- Real user authentication / authorization (SpringSecurity+JWT)
+- Replace H2 with **PostgreSQL** or **MySQL** for persistence
+- Add **Swagger UI** for API docs
+- Use **Global TradeId** to track
+- Integrate **MessageQueue** to async transfer
+- Real user **authentication / authorization** (SpringSecurity+JWT)
 
 ---

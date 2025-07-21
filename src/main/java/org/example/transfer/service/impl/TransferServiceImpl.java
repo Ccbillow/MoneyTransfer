@@ -7,6 +7,7 @@ import org.example.transfer.comm.enums.ExceptionEnum;
 import org.example.transfer.comm.enums.TransferTypeEnum;
 import org.example.transfer.exception.BusinessException;
 import org.example.transfer.executor.CircuitBreakerExecutor;
+import org.example.transfer.executor.IdempotentExecutor;
 import org.example.transfer.executor.OptimisticRetryExecutor;
 import org.example.transfer.executor.RateLimiterExecutor;
 import org.example.transfer.handler.TransferHandlerFactory;
@@ -50,9 +51,9 @@ public class TransferServiceImpl implements TransferService {
 
 //    @Autowired
 //    private RedisLockExecutor redisLockExecutor;
-//
-//    @Autowired
-//    private IdempotentExecutor idempotentExecutor;
+
+    @Autowired
+    private IdempotentExecutor idempotentExecutor;
 
     @Autowired
     private TransferHandlerFactory transferHandlerFactory;
@@ -70,10 +71,11 @@ public class TransferServiceImpl implements TransferService {
 //                                        retryExecutor.executeWithRetry(() ->
 //                                                doTransfer(request))))));
 
-        rateLimiterExecutor.execute(() ->
-                circuitBreakerExecutor.execute(() ->
-                        retryExecutor.executeWithRetry(() ->
-                                doTransfer(request))));
+        idempotentExecutor.execute(request.getRequestId(), () ->
+                rateLimiterExecutor.execute(() ->
+                        circuitBreakerExecutor.execute(() ->
+                                retryExecutor.executeWithRetry(() ->
+                                        doTransfer(request)))));
 
     }
 
