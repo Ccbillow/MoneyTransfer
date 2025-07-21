@@ -57,7 +57,7 @@ public class TransferControllerDifferentTransferTypeTest extends BaseControllerT
     }
 
     @Test
-    public void testDiffTypeRepeatTransferAUDFromBobToAlice20Times_Fail() throws Exception {
+    public void testDiffTypeTransferAUDFromBobToAlice20Times_Fail() throws Exception {
         setup(DEFAULT_ACCOUNR_PARH, DEFAULT_RATE_PARH);
 
         List<CommonResponse<Void>> responses = new ArrayList<>();

@@ -56,7 +56,7 @@ public class TransferControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void testRepeatTransferAUDFromBobToAlice20Times_Fail() throws Exception {
+    public void testTransferAUDFromBobToAlice20Times_Fail() throws Exception {
         setup(DEFAULT_ACCOUNR_PARH, DEFAULT_RATE_PARH);
 
         List<CommonResponse<Void>> responses = new ArrayList<>();
@@ -85,7 +85,7 @@ public class TransferControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void testRepeatTransferAUDFromBobToAliceSameRequestId20Times_Fail() throws Exception {
+    public void testTransferAUDFromBobToAliceSameRequestId20Times_Fail() throws Exception {
         setup(DEFAULT_ACCOUNR_PARH, DEFAULT_RATE_PARH);
 
         int threadCount = 20;
