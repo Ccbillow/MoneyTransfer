@@ -1,3 +1,6 @@
+server:
+  port: 8089
+
 spring:
   datasource:
     url: jdbc:h2:mem:transferdb
@@ -29,3 +32,6 @@ resilience4j:
         minimumNumberOfCalls: 20      # Minimum 10 calls must be made before calculating failure rate
         failureRateThreshold: 50      # If 50% or more calls fail, open the circuit
         waitDurationInOpenState: 15s  # Keep the circuit open for 10 seconds before transitioning to half-open
+
+transfer:
+  enable-different-currency-transfer: false
