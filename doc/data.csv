@@ -1,0 +1,4 @@
+fromId,toId,currency,amount,requestId
+2,1,AUD,20,REQAAA
+1,2,USD,40,REQBBB
+1,2,CNY,40,REQCCC

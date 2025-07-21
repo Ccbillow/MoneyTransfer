@@ -1,0 +1,80 @@
+{
+	"info": {
+		"_postman_id": "f2d0ed21-b27a-4d47-85c4-f6a4fee781a7",
+		"name": "moneytransfer",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "740563"
+	},
+	"item": [
+		{
+			"name": "AliceToBob50USD",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"requestId\": \"AAABBBCCC\",\n    \"fromId\": 1,\n    \"toId\": 2,\n    \"amount\": 50,\n    \"transferCurrency\": \"USD\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8089/api/transfer",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8089",
+					"path": [
+						"api",
+						"transfer"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "BobToAlice50AUD_20times",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"requestId\": \"CCCBBBAAA\",\n    \"fromId\": 2,\n    \"toId\": 1,\n    \"amount\": 50,\n    \"transferCurrency\": \"AUD\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8089/api/transfer",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8089",
+					"path": [
+						"api",
+						"transfer"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
