@@ -3,10 +3,5 @@
     "fromCurrency": "USD",
     "toCurrency": "AUD",
     "rate": "2"
-  },
-  {
-    "fromCurrency": "USD",
-    "toCurrency": "JPN",
-    "rate": "150"
   }
 ]

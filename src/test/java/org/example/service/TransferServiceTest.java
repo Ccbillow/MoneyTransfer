@@ -1,11 +1,9 @@
 package org.example.service;
 
-import org.example.BaseTest;
 import org.example.comm.enums.Currency;
 import org.example.comm.enums.ExceptionEnum;
 import org.example.exception.BusinessException;
 import org.example.model.Account;
-import org.example.model.FxRate;
 import org.example.params.req.TransferRequest;
 import org.example.repository.AccountRepository;
 import org.example.repository.FxRateRepository;
@@ -18,17 +16,17 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 /**
  * transfer service test
  */
-public class TransferServiceTest extends BaseTest {
+public class TransferServiceTest extends BaseServiceTest {
     @Autowired
     private TransferService transferService;
 
@@ -39,7 +37,6 @@ public class TransferServiceTest extends BaseTest {
     private FxRateRepository fxRateRepository;
 
     @MockBean
-
     private TransferLogRepository transferLogRepository;
 
 
@@ -196,7 +193,7 @@ public class TransferServiceTest extends BaseTest {
     }
 
     @Test
-    public void testTransfer_No_Existing_Rate() {
+    public void testTransfer_Diff_Currency() {
         TransferRequest request = new TransferRequest();
         request.setFromId(1L);
         request.setToId(2L);
@@ -216,90 +213,13 @@ public class TransferServiceTest extends BaseTest {
         to.setBalance(BigDecimal.valueOf(500));
 
         when(accountRepository.findAllById(List.of(1L, 2L))).thenReturn(List.of(from, to));
-        when(fxRateRepository.findByFromCurrencyAndToCurrency(Currency.USD, Currency.JPN))
-                .thenReturn(Optional.ofNullable(null));
 
         BusinessException ex = assertThrows(
                 BusinessException.class,
                 () -> transferService.transfer(request)
         );
 
-        assertEquals(ExceptionEnum.RATE_NOT_SUPPORT.getErrorCode(), ex.getErrorCode());
-        assertEquals("not support rate!", ex.getErrorMsg());
-    }
-
-    @Test
-    public void testTransfer_Diff_Currency_Insufficient_Balance() {
-        TransferRequest request = new TransferRequest();
-        request.setFromId(1L);
-        request.setToId(2L);
-        request.setTransferCurrency(Currency.USD);
-        request.setAmount(BigDecimal.valueOf(1000));
-
-        Account from = new Account();
-        from.setId(1L);
-        from.setName("Alice");
-        from.setCurrency(Currency.USD);
-        from.setBalance(BigDecimal.valueOf(1000));
-
-        Account to = new Account();
-        to.setId(2L);
-        to.setName("Bob");
-        to.setCurrency(Currency.AUD);
-        to.setBalance(BigDecimal.valueOf(500));
-
-        FxRate rate = new FxRate();
-        rate.setId(1L);
-        rate.setFromCurrency(Currency.USD);
-        rate.setToCurrency(Currency.AUD);
-        rate.setRate(BigDecimal.valueOf(2));
-
-        when(accountRepository.findAllById(List.of(1L, 2L))).thenReturn(List.of(from, to));
-        when(fxRateRepository.findByFromCurrencyAndToCurrency(Currency.USD, Currency.AUD))
-                .thenReturn(Optional.of(rate));
-
-        BusinessException ex = assertThrows(
-                BusinessException.class,
-                () -> transferService.transfer(request)
-        );
-
-        assertEquals(ExceptionEnum.MONEY_TRANSFER_ERROR.getErrorCode(), ex.getErrorCode());
-        assertEquals("Insufficient balance", ex.getErrorMsg());
-    }
-
-    @Test
-    public void testTransfer_Diff_Currency() {
-        TransferRequest request = new TransferRequest();
-        request.setFromId(1L);
-        request.setToId(2L);
-        request.setTransferCurrency(Currency.USD);
-        request.setAmount(BigDecimal.valueOf(50));
-
-        Account from = new Account();
-        from.setId(1L);
-        from.setName("Alice");
-        from.setCurrency(Currency.USD);
-        from.setBalance(BigDecimal.valueOf(1000));
-
-        Account to = new Account();
-        to.setId(2L);
-        to.setName("Bob");
-        to.setCurrency(Currency.AUD);
-        to.setBalance(BigDecimal.valueOf(500));
-
-        FxRate rate = new FxRate();
-        rate.setId(1L);
-        rate.setFromCurrency(Currency.USD);
-        rate.setToCurrency(Currency.AUD);
-        rate.setRate(BigDecimal.valueOf(2));
-
-        when(accountRepository.findAllById(List.of(1L, 2L))).thenReturn(List.of(from, to));
-        when(fxRateRepository.findByFromCurrencyAndToCurrency(Currency.USD, Currency.AUD))
-                .thenReturn(Optional.of(rate));
-
-        transferService.transfer(request);
-
-        assertEquals(0, BigDecimal.valueOf(949.50).compareTo(from.getBalance()));
-        assertEquals(0, BigDecimal.valueOf(600).compareTo(to.getBalance()));
+        assertEquals(ExceptionEnum.TRANSFER_TYPE_NOT_SUPPORT.getErrorCode(), ex.getErrorCode());
+        assertTrue(ex.getErrorMsg().contains("not support transfer type: DIFFERENT"));
     }
 }

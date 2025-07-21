@@ -9,7 +9,8 @@ public enum ExceptionEnum implements BaseErrorInfoInterface {
 
     PARAM_ILLEGAL("4001","param illegal!"),
     NOT_FOUND("4004", "not found resources!"),
-    USER_NOT_EXIST("4008", "user not exist!"),
+    USER_NOT_EXIST("4007", "user not exist!"),
+    TRANSFER_TYPE_NOT_SUPPORT("4008", "not support transfer type!"),
     RATE_NOT_SUPPORT("4009", "not support rate!"),
     MONEY_TRANSFER_ERROR("4010", "money transfer error!"),
     OPTIMISTIC_LOCK_MAX_RETRY_ERROR("4011", "max retry exceeded due to optimistic locking!"),
