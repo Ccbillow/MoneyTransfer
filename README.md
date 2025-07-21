@@ -29,9 +29,9 @@ accounts using an in-memory H2 database.
 ## Predefined Accounts
 
 | ID | Name  | Balance | Currency |
-|----|-------|-----------------|----------|
-| 1  | Alice | 1000            | USD      |
-| 2  | Bob   | 500             | JPN      |
+|----|-------|---------|----------|
+| 1  | Alice | 1000    | USD      |
+| 2  | Bob   | 500     | JPN      |
 
 ## FX Rate
 
@@ -40,8 +40,6 @@ accounts using an in-memory H2 database.
 ## Transaction Fee
 
 - A **1% fee** is deducted from the **initiator's** account, in their base currency.
-
-
 
 ## Tech Stack
 
@@ -53,6 +51,7 @@ accounts using an in-memory H2 database.
 - JUnit + Spring Test
 
 ## Project Structure
+
 ```bash
 src/
 ├── main/
@@ -160,32 +159,34 @@ All scenarios are covered in unit & integration tests under src/test/java. You c
 
 #### If not support Currency conversion
 
-| Scenario Description                                                                                                                                            | Testcase Name                                                | Error Msg                                                                                                                                                 |
-|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 1. Transfer 50 USD to Alice to Bob                                                                                                                              | ```testTransfer_USD_From_Alice_To_Bob_Fail```                | not support transfer type: DIFFERENT, fromCurrency:USD, toCurrency:JPN                                                                                    |
-| 2. Transfer 50 AUD to Bob to Alice recurring for 20 times                                                                                                       | ```testRepeatTransfer_AUD_From_Bob_To_Alice_20_Times_Fail``` | Sender must use base currency.                                                                                                                            |
-| 3. Concurrently <br> 3.1. Transfer 20 AUD from Bob to Alice<br> 3.2. Transfer money from 40 USD  Alice to bob<br> 3.3. Transfer money from 40 CNY  Alice to bob | ```testConcurrentTransfer_Fail```                            | 1. Sender must use base currency.<br> 2. not support transfer type: DIFFERENT, fromCurrency:USD, toCurrency:JPN<br> 3. Sender must use base currency.<br> |
+| Scenario Description                                                                                                                                            | Testcase Name                                         | Error Msg                                                                                                                                                 |
+|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 1. Transfer 50 USD to Alice to Bob                                                                                                                              | ```testTransferUSDFromAliceToBob_Fail```              | not support transfer type: DIFFERENT, fromCurrency:USD, toCurrency:JPN                                                                                    |
+| 2. Transfer 50 AUD to Bob to Alice recurring for 20 times                                                                                                       | ```testRepeatTransferAUDFromBobToAlice20Times_Fail``` | Sender must use base currency.                                                                                                                            |
+| 3. Concurrently <br> 3.1. Transfer 20 AUD from Bob to Alice<br> 3.2. Transfer money from 40 USD  Alice to bob<br> 3.3. Transfer money from 40 CNY  Alice to bob | ```testConcurrentTransfer_Fail```                     | 1. Sender must use base currency.<br> 2. not support transfer type: DIFFERENT, fromCurrency:USD, toCurrency:JPN<br> 3. Sender must use base currency.<br> |
 
 #### If support Currency conversion
 
-| Scenario Description                                                                                                                                            | Testcase Name                                                        | Error Msg                                                                                        |
-|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------|--------------------------------------------------------------------------------------------------|
-| 1. Transfer 50 USD to Alice to Bob                                                                                                                              | ```testDiffTypeTransfer_USD_From_Alice_To_Bob_Fail```                | not support rate!                                                                                |
-| 2. Transfer 50 AUD to Bob to Alice recurring for 20 times                                                                                                       | ```testDiffTypeRepeatTransfer_AUD_From_Bob_To_Alice_20_Times_Fail``` | Sender must use base currency.                                                                   |
-| 3. Concurrently <br> 3.1. Transfer 20 AUD from Bob to Alice<br> 3.2. Transfer money from 40 USD  Alice to bob<br> 3.3. Transfer money from 40 CNY  Alice to bob | ```testDiffTypeConcurrentTransfer_Fail```                            | 1. Sender must use base currency.<br> 2. not support rate!<br> 3. Sender must use base currency. |
+| Scenario Description                                                                                                                                                           | Testcase Name                                                 | Error Msg                                                                                        |
+|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------|--------------------------------------------------------------------------------------------------|
+| 1. Transfer 50 USD to Alice to Bob                                                                                                                                             | ```testDiffTypeTransferUSDFromAliceToBob_Fail```              | not support rate!                                                                                |
+| 2. Transfer 50 AUD to Bob to Alice recurring for 20 times                                                                                                                      | ```testDiffTypeRepeatTransferAUDFromBobToAlice20Times_Fail``` | Sender must use base currency.                                                                   |
+| 3. Concurrently <br> 3.1. Transfer 20 AUD from Bob to Alice<br> 3.2. Transfer money from 40 USD  Alice to bob<br> 3.3. Transfer money from 40 CNY  Alice to bob                | ```testDiffTypeConcurrentTransfer_Fail```                     | 1. Sender must use base currency.<br> 2. not support rate!<br> 3. Sender must use base currency. |
+| 4. Transfer 50 AUD to Bob to Alice recurring for 20 times (fxRate exist)                                                                                                       | ```testTransferUSDFromAliceToBob_Success```                   | success                                                                                          |
+| 5. Concurrently (fxRate exist) <br> 3.1. Transfer 20 AUD from Bob to Alice<br> 3.2. Transfer money from 40 USD  Alice to bob<br> 3.3. Transfer money from 40 CNY  Alice to bob | ```testConcurrentTransfer_Success```                          | 1. Sender must use base currency.<br> 2. success<br> 3. Sender must use base currency.           |
 
 ### Performance tests
 
 All performance tests are based on **same-currency transfers**. The following scenarios are tested:
 
-| Scenario Description               | Testcase Name                                 | Result                                             |
-|------------------------------------|-----------------------------------------------|----------------------------------------------------|
-| 1. Concurrent transfers            | ```testConcurrentTransfer_Money_Success```    | final balances are correct                         |
-| 2. Low concurrency (5 threads)     | ```testLowConcurrentTransfer_Retry_Success``` | all transfers succeed after retries                |
-| 3. Medium concurrency (50 threads) | ```testMidConcurrentTransfer_Retry_Success``` | all transfers succeed after retries                |
-| 4. High concurrency (1000 threads) | ```testHighConcurrentTransfer_Retry_Fail```   | some transfers fail after exceeding 3 retries      |
-| 5. Circuit breaker                 | ```testCircuitBreakerOpenState```             | Circuit breaker triggers successfully              |
-| 6. Rate limiter                    | ```testRateLimiter```                         | Rate limiter blocks excessive requests as expected |
+| Scenario Description               | Testcase Name                               | Result                                             |
+|------------------------------------|---------------------------------------------|----------------------------------------------------|
+| 1. Concurrent transfers            | ```testConcurrentTransferMoney_Success```   | final balances are correct                         |
+| 2. Low concurrency (5 threads)     | ```testLowConcurrentTransferRetry_Success``` | all transfers succeed after retries                |
+| 3. Medium concurrency (50 threads) | ```testMidConcurrentTransferRetry_Success``` | all transfers succeed after retries                |
+| 4. High concurrency (1000 threads) | ```testHighConcurrentTransferRetry_Fail```  | some transfers fail after exceeding 3 retries      |
+| 5. Circuit breaker                 | ```testCircuitBreakerOpenState```           | Circuit breaker triggers successfully              |
+| 6. Rate limiter                    | ```testRateLimiter```                       | Rate limiter blocks excessive requests as expected |
 
 ### Assumptions Made
 

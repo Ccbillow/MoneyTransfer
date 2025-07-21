@@ -47,7 +47,7 @@ public class TransferControllerPerformenceTest extends BaseControllerTest {
      * Result: all tasks success
      */
     @Test
-    public void testConcurrentTransfer_Money_Success() throws Exception {
+    public void testConcurrentTransferMoney_Success() throws Exception {
         setup("testdata/accounts_test_performance.json", "testdata/rate_test_performance.json");
         final Random random = new Random();
         int concurrent = 10;
@@ -87,7 +87,7 @@ public class TransferControllerPerformenceTest extends BaseControllerTest {
      * Result: all success
      */
     @Test
-    public void testLowConcurrentTransfer_Retry_Success() throws Exception {
+    public void testLowConcurrentTransferRetry_Success() throws Exception {
         setup("testdata/accounts_test_performance.json", "testdata/rate_test_performance.json");
         final Random random = new Random();
         int concurrent = 10;
@@ -123,7 +123,7 @@ public class TransferControllerPerformenceTest extends BaseControllerTest {
      * Result: all success
      */
     @Test
-    public void testMidConcurrentTransfer_Retry_Success() throws Exception {
+    public void testMidConcurrentTransferRetry_Success() throws Exception {
         setup("testdata/accounts_test_performance.json", "testdata/rate_test_performance.json");
         final Random random = new Random();
         int concurrent = 50;
@@ -159,7 +159,7 @@ public class TransferControllerPerformenceTest extends BaseControllerTest {
      * Result: some tasks success, some tasks fail
      */
     @Test
-    public void testHighConcurrentTransfer_Retry_Fail() throws Exception {
+    public void testHighConcurrentTransferRetry_Fail() throws Exception {
         setup("testdata/accounts_test_performance.json", "testdata/rate_test_performance.json");
         final Random random = new Random();
         int concurrent = 1000;

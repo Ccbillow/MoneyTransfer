@@ -34,7 +34,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 public class TransferControllerDifferentTransferTypeTest extends BaseControllerTest {
 
     @Test
-    public void testDiffTypeTransfer_USD_From_Alice_To_Bob_Fail() throws Exception {
+    public void testDiffTypeTransferUSDFromAliceToBob_Fail() throws Exception {
         setup(DEFAULT_ACCOUNR_PARH, DEFAULT_RATE_PARH);
 
         TransferRequest request = new TransferRequest();
@@ -55,7 +55,7 @@ public class TransferControllerDifferentTransferTypeTest extends BaseControllerT
     }
 
     @Test
-    public void testDiffTypeRepeatTransfer_AUD_From_Bob_To_Alice_20_Times_Fail() throws Exception {
+    public void testDiffTypeRepeatTransferAUDFromBobToAlice20Times_Fail() throws Exception {
         setup(DEFAULT_ACCOUNR_PARH, DEFAULT_RATE_PARH);
 
         List<CommonResponse<Void>> responses = new ArrayList<>();
@@ -129,7 +129,7 @@ public class TransferControllerDifferentTransferTypeTest extends BaseControllerT
      * @throws Exception
      */
     @Test
-    public void testTransfer_USD_From_Alice_To_Bob_Success() throws Exception {
+    public void testTransferUSDFromAliceToBob_Success() throws Exception {
         setup("testdata/accounts_test_one.json", "testdata/rate_test_one.json");
 
         TransferRequest request = new TransferRequest();

@@ -31,7 +31,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 public class TransferControllerTest extends BaseControllerTest {
 
     @Test
-    public void testTransfer_USD_From_Alice_To_Bob_Fail() throws Exception {
+    public void testTransferUSDFromAliceToBob_Fail() throws Exception {
         setup(DEFAULT_ACCOUNR_PARH, DEFAULT_RATE_PARH);
 
         TransferRequest request = new TransferRequest();
@@ -52,7 +52,7 @@ public class TransferControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void testRepeatTransfer_AUD_From_Bob_To_Alice_20_Times_Fail() throws Exception {
+    public void testRepeatTransferAUDFromBobToAlice20Times_Fail() throws Exception {
         setup(DEFAULT_ACCOUNR_PARH, DEFAULT_RATE_PARH);
 
         List<CommonResponse<Void>> responses = new ArrayList<>();

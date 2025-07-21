@@ -50,7 +50,7 @@ public class TransferServiceDifferentTransferTypeTest extends BaseServiceTest {
     }
 
     @Test
-    public void testTransfer_No_Existing_Rate() {
+    public void testTransferNoExistingRate() {
         TransferRequest request = new TransferRequest();
         request.setFromId(1L);
         request.setToId(2L);
@@ -83,7 +83,7 @@ public class TransferServiceDifferentTransferTypeTest extends BaseServiceTest {
     }
 
     @Test
-    public void testTransfer_Diff_Currency_Insufficient_Balance() {
+    public void testTransferDiffCurrencyInsufficientBalance_Fail() {
         TransferRequest request = new TransferRequest();
         request.setFromId(1L);
         request.setToId(2L);
@@ -122,7 +122,7 @@ public class TransferServiceDifferentTransferTypeTest extends BaseServiceTest {
     }
 
     @Test
-    public void testTransfer_Diff_Currency() {
+    public void testTransferDiffCurrency_Success() {
         TransferRequest request = new TransferRequest();
         request.setFromId(1L);
         request.setToId(2L);

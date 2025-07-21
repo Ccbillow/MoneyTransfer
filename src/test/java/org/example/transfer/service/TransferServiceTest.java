@@ -46,7 +46,7 @@ public class TransferServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void testTransfer_Same_User() {
+    public void testTransferSameUser_Fail() {
         TransferRequest request = new TransferRequest();
         request.setFromId(1L);
         request.setToId(1L);
@@ -63,7 +63,7 @@ public class TransferServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void testTransfer_From_Not_Exist() {
+    public void testTransferFromNotExist_Fail() {
         TransferRequest request = new TransferRequest();
         request.setFromId(1L);
         request.setToId(2L);
@@ -81,7 +81,7 @@ public class TransferServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void testTransfer_To_Not_Exist() {
+    public void testTransferToNotExist_Fail() {
         TransferRequest request = new TransferRequest();
         request.setFromId(1L);
         request.setToId(2L);
@@ -105,7 +105,7 @@ public class TransferServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void testTransfer_From_Currency_Not_Match() {
+    public void testTransferFromCurrencyNotMatch_Fail() {
         TransferRequest request = new TransferRequest();
         request.setFromId(1L);
         request.setToId(2L);
@@ -134,7 +134,7 @@ public class TransferServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void testTransfer_Same_Currency_Insufficient_Balance() {
+    public void testTransferSameCurrencyInsufficientBalance_Fail() {
         TransferRequest request = new TransferRequest();
         request.setFromId(1L);
         request.setToId(2L);
@@ -164,7 +164,7 @@ public class TransferServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void testTransfer_Same_Currency() {
+    public void testTransferSameCurrency_Success() {
         TransferRequest request = new TransferRequest();
         request.setFromId(1L);
         request.setToId(2L);
@@ -193,7 +193,7 @@ public class TransferServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void testTransfer_Diff_Currency() {
+    public void testTransferDiffCurrency_Fail() {
         TransferRequest request = new TransferRequest();
         request.setFromId(1L);
         request.setToId(2L);
