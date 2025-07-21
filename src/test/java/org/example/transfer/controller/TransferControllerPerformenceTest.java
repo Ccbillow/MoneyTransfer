@@ -5,8 +5,7 @@ import org.example.transfer.comm.enums.ExceptionEnum;
 import org.example.transfer.params.req.TransferRequest;
 import org.example.transfer.params.resp.CommonResponse;
 import org.example.transfer.util.JsonUtils;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 
@@ -24,8 +23,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 /**
@@ -183,7 +183,7 @@ public class TransferControllerPerformenceTest extends BaseControllerTest {
             } else if (ExceptionEnum.OPTIMISTIC_LOCK_MAX_RETRY_ERROR.getErrorCode().equals(response.getErrorCode())) {
                 optimisticLockMaxRetryFailureCount++;
             } else {
-                Assert.fail("Unexpected response code: " + response.getErrorMsg());
+                fail("Unexpected response code: " + response.getErrorMsg());
             }
         }
 
@@ -247,7 +247,7 @@ public class TransferControllerPerformenceTest extends BaseControllerTest {
             } else if (ExceptionEnum.RATE_LIMIT_EXCEEDED.getErrorCode().equals(response.getErrorCode())) {
                 rateLimitRejectCount++;
             } else {
-                Assert.fail("Unexpected response code: " + response.getErrorMsg());
+                fail("Unexpected response code: " + response.getErrorMsg());
             }
         }
 
@@ -306,7 +306,7 @@ public class TransferControllerPerformenceTest extends BaseControllerTest {
             } else if (ExceptionEnum.IDEMPOTENT_REQUEST.getErrorCode().equals(response.getErrorCode())) {
                 idempotentErrorCount++;
             } else {
-                Assert.fail("Unexpected error: " + response.getErrorMsg());
+                fail("Unexpected error: " + response.getErrorMsg());
             }
         }
 

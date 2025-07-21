@@ -5,8 +5,7 @@ import org.example.transfer.comm.enums.ExceptionEnum;
 import org.example.transfer.params.req.TransferRequest;
 import org.example.transfer.params.resp.CommonResponse;
 import org.example.transfer.util.JsonUtils;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 
@@ -22,9 +21,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 /**
@@ -135,7 +135,7 @@ public class TransferControllerTest extends BaseControllerTest {
             } else if (response.getErrorCode().equals(ExceptionEnum.IDEMPOTENT_REQUEST.getErrorCode())) {
                 idempotentRejectCount++;
             } else {
-                Assert.fail("Unexpected error code: " + response.getErrorCode());
+                fail("Unexpected error code: " + response.getErrorCode());
             }
         }
 
