@@ -1,5 +1,3 @@
----
-
 # Money Transfer System
 
 ## Table of Contents
@@ -9,7 +7,6 @@
 - [Init Data](#predefined-accounts)
 - [Project Structure](#project-structure)
 - [How to Run](#how-to-run)
-- [API Usage](#api-example)
 - [Features](#supported-features)
 - [Concurrency Strategy](#concurrency-strategy)
 - [Test Scenarios](#test-scenarios)
@@ -44,7 +41,7 @@ accounts using an in-memory H2 database.
 
 - A **1% fee** is deducted from the **initiator's** account, in their base currency.
 
----
+
 
 ## Tech Stack
 
