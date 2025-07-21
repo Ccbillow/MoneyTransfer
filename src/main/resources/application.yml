@@ -29,9 +29,9 @@ resilience4j:
     instances:
       transferCircuitBreaker:
         slidingWindowSize: 50         # Track the outcome of the last 50 calls
-        minimumNumberOfCalls: 20      # Minimum 10 calls must be made before calculating failure rate
+        minimumNumberOfCalls: 20      # Minimum 20 calls must be made before calculating failure rate
         failureRateThreshold: 50      # If 50% or more calls fail, open the circuit
-        waitDurationInOpenState: 15s  # Keep the circuit open for 10 seconds before transitioning to half-open
+        waitDurationInOpenState: 15s  # Keep the circuit open for 15 seconds before transitioning to half-open
 
 transfer:
   enable-different-currency-transfer: false
