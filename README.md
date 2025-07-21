@@ -33,11 +33,11 @@ accounts using an in-memory H2 database.
 | 1  | Alice | 1000    | USD      |
 | 2  | Bob   | 500     | JPN      |
 
-## FX Rate
+#### FX Rate
 
 - `0.50 USD` = `1 AUD`
 
-## Transaction Fee
+#### Transaction Fee
 
 - A **1% fee** is deducted from the **initiator's** account, in their base currency.
 
@@ -146,6 +146,7 @@ Ensure you have Java 17 and Maven installed.
 - Retry.
 - Circuit Breaker.
 - Rate Limiter.
+- Idempotent. 
 
 ## Test Scenarios
 
@@ -213,7 +214,7 @@ All performance tests are based on **same-currency transfers**. The following sc
 - Save request to DB after all retry times fail and send email to developer
 - Replace H2 with **PostgreSQL** or **MySQL** for persistence
 - Add **Swagger UI** for API docs
-- Use **Global TradeId** to track
+- Use **Global TraceId** to track
 - Integrate **MessageQueue** to async transfer
 - Real user **authentication / authorization** (SpringSecurity+JWT)
 - Use **SpringCloud** as microservices
