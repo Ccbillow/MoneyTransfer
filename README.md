@@ -81,7 +81,7 @@ src/
         └── application-test.yml
 ```
 ## Sequence Diagram
-![Money Transfer](sequencediagram/money-transfer.png)
+![Money Transfer](doc/money-transfer.png)
 
 ## How to Run
 
@@ -152,7 +152,7 @@ Ensure you have Java 17 and Maven installed.
 Run all tests with:
 
 ```bash
-mvn test
+mvn clean test
 ```
 
 ### Assignment tests:
