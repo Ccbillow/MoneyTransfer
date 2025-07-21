@@ -85,7 +85,7 @@ public class TransferControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void testTransferAUDFromBobToAliceSameRequestId20Times_Fail() throws Exception {
+    public void testTransferAUDFromBobToAliceSameReqId20Times_Fail() throws Exception {
         setup(DEFAULT_ACCOUNR_PARH, DEFAULT_RATE_PARH);
 
         int threadCount = 20;
