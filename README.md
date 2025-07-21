@@ -80,7 +80,7 @@ src/
         ├── testdata/
         └── application-test.yml
 ```
-## Money Transfer Sequence Diagram
+## Sequence Diagram
 ![Money Transfer](sequencediagram/money-transfer.png)
 
 ## How to Run
