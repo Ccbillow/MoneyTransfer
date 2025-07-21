@@ -193,6 +193,16 @@ All performance tests are based on **same-currency transfers**. The following sc
 | 6. Rate limiter                    | ```testRateLimiter```                         | Rate limiter blocks excessive requests as expected |
 | 6. Idempotent                      | ```testIdempotent_DuplicateRequestRejected``` | Same requestId, only one can success               |
 
+### Postman/JMeter
+
+#### Postman
+[postman-config](doc/moneytransfer.postman_collection.json)
+
+#### JMeter
+[jmeter-config](doc/TestCase3.jmx)
+
+[jmeter-data](doc/data.csv)
+
 ### Assumptions Made
 
 - Only base currency transfer is allowed unless explicitly enabled
