@@ -107,29 +107,30 @@ Ensure you have Java 17 and Maven installed.
    Password:
    ```
 
-4. **API Example**:
-   ```
-   POST /api/transfer
-   ```
+    4. **API Example**:
+       ```
+       POST /api/transfer
+       ```
 
-    - Request Body
-   ```
-   {
-    "fromId": 1,                 --from accountID
-    "toId": 2,                   --to accountID
-    "amount": 50,                --transfer amount
-    "transferCurrency": "USD"    --transfer currency
-   }
-   ```
-    - Response
-   ```
-   {
-    "success": false,
-    "errorCode": "4008",
-    "errorMsg": "not support transfer type: DIFFERENT, fromCurrency:USD, toCurrency:JPN",
-    "data": null
-   }
-   ```
+        - Request Body
+       ```
+       {
+        "requestId": "CCCBBBAAA",    --reqId
+        "fromId": 1,                 --from accountID
+        "toId": 2,                   --to accountID
+        "amount": 50,                --transfer amount
+        "transferCurrency": "USD"    --transfer currency
+       }
+       ```
+        - Response
+       ```
+       {
+        "success": false,
+        "errorCode": "4008",
+        "errorMsg": "not support transfer type: DIFFERENT, fromCurrency:USD, toCurrency:JPN",
+        "data": null
+       }
+       ```
 
 ## Supported Features
 
@@ -209,13 +210,14 @@ All performance tests are based on **same-currency transfers**. The following sc
 
 ### Assumptions Made
 
-- Only base currency transfer is allowed unless explicitly enabled
+- Only base currency transfer is allowed.
 - All account balances are stored with **2 decimal precision**.
 - H2 database is ephemeral; restarts will reset all data.
 - Cross-currency transfer is allowed only if:
     - application.yml -> **transfer.enable-different-currency-transfer = true**
     - The transfer currency matches the sender’s base currency
     - A valid fxRate to the recipient’s currency exists
+    - e.g. **from -> fromCurrency(USD) -> fxRate(USD->JPN) -> toCurrency(JPN) -> to**
 
 ### Possible Enhancements
 
@@ -226,12 +228,12 @@ All performance tests are based on **same-currency transfers**. The following sc
     - Idempotent request execution (IdempotentExecutor.java)
 - Integrate **ConfigCenter** to maintain config (DEFAULT_MAX_RETRIES, FEE_RATE)
 - Save request to DB after all retry times fail and send email to developer
-- Replace H2 with **PostgreSQL** or **MySQL** for persistence
-- Add **Swagger UI** for API docs
-- Use **Global TraceId** to track
 - Integrate **MessageQueue** to async transfer
 - Real user **authentication / authorization** (SpringSecurity+JWT)
 - Use **SpringCloud** as microservices
 - Integrate **CI/CD** (Jenkins/Github Actions)
+- Replace H2 with **PostgreSQL** or **MySQL** for persistence
+- Add **Swagger UI** for API docs
+- Use **Global TraceId** to track
 
 ---
