@@ -2,19 +2,8 @@ server:
   port: 8089
 
 spring:
-  datasource:
-    url: jdbc:h2:mem:transferdb
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
-  jpa:
-    defer-datasource-initialization: true
-    hibernate:
-      ddl-auto: update
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
+  profiles:
+    active: dev  # default dev
 
 resilience4j:
   ratelimiter:
@@ -31,6 +20,3 @@ resilience4j:
         minimumNumberOfCalls: 20      # Minimum 20 calls must be made before calculating failure rate
         failureRateThreshold: 50      # If 50% or more calls fail, open the circuit
         waitDurationInOpenState: 15s  # Keep the circuit open for 15 seconds before transitioning to half-open
-
-transfer:
-  enable-different-currency-transfer: false

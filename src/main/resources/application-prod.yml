@@ -1,0 +1,13 @@
+spring:
+  datasource:
+    # todo prod db config
+    url: jdbc:mysql://prod-db-host:3306/transfer
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: prod_user
+    password: prod_pass
+  jpa:
+    hibernate:
+      ddl-auto: validate
+
+transfer:
+  enable-different-currency-transfer: true
