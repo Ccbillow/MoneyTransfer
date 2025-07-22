@@ -107,30 +107,30 @@ Ensure you have Java 17 and Maven installed.
    Password:
    ```
 
-    4. **API Example**:
-       ```
-       POST /api/transfer
-       ```
+4. **API Example**:
+   ```
+   POST /api/transfer
+   ```
 
-        - Request Body
-       ```
-       {
-        "requestId": "CCCBBBAAA",    --reqId
-        "fromId": 1,                 --from accountID
-        "toId": 2,                   --to accountID
-        "amount": 50,                --transfer amount
-        "transferCurrency": "USD"    --transfer currency
-       }
-       ```
-        - Response
-       ```
-       {
-        "success": false,
-        "errorCode": "4008",
-        "errorMsg": "not support transfer type: DIFFERENT, fromCurrency:USD, toCurrency:JPN",
-        "data": null
-       }
-       ```
+    - Request Body
+   ```
+   {
+    "requestId": "CCCBBBAAA",    --reqId
+    "fromId": 1,                 --from accountID
+    "toId": 2,                   --to accountID
+    "amount": 50,                --transfer amount
+    "transferCurrency": "USD"    --transfer currency
+   }
+   ```
+    - Response
+   ```
+   {
+    "success": false,
+    "errorCode": "4008",
+    "errorMsg": "not support transfer type: DIFFERENT, fromCurrency:USD, toCurrency:JPN",
+    "data": null
+   }
+   ```
 
 ## Supported Features
 
