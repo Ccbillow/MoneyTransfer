@@ -221,7 +221,7 @@ All performance tests are based on **same-currency transfers**. The following sc
 
 ### Possible Enhancements
 
-- Separate Account to User+Account
+- Separate Account to User+Account                              --done
 - Get FxRate from **external service** or **Redis**
 - Integrate **Redis**
     - Distributed Lock (RedisLockExecutor.java)
@@ -230,9 +230,9 @@ All performance tests are based on **same-currency transfers**. The following sc
 - Save request to DB after all retry times fail and send email to developer
 - Integrate **MessageQueue** to async transfer
 - Real user **authentication / authorization** (SpringSecurity+JWT)
-- Use **SpringCloud** as microservices
+- Use **SpringCloud** as microservices                         --done
 - Integrate **CI/CD** (Jenkins/Github Actions)
-- Replace H2 with **PostgreSQL** or **MySQL** for persistence
+- Replace H2 with **PostgreSQL** or **MySQL** for persistence  --done
 - Add **Swagger UI** for API docs
 - Use **Global TraceId** to track
 

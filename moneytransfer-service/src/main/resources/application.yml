@@ -1,0 +1,39 @@
+server:
+  port: 8089
+
+spring:
+  application:
+    name: moneytransfer-service
+  profiles:
+    active: dev  # default dev
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+
+eureka:
+  client:
+    service-url:
+      register-with-eureka: true
+      fetch-registry: true
+      defaultZone: http://eureka-service:8761/eureka/
+
+
+
+
+resilience4j:
+  ratelimiter:
+    instances:
+      transferRateLimiter:
+        limitForPeriod: 1000    # Allow 1000 calls per refresh period
+        limitRefreshPeriod: 1s  # Reset the limit every 1 second
+        timeoutDuration: 0      # Do not wait for permission, immediately reject excess calls
+
+  circuitbreaker:
+    instances:
+      transferCircuitBreaker:
+        slidingWindowSize: 50         # Track the outcome of the last 50 calls
+        minimumNumberOfCalls: 20      # Minimum 20 calls must be made before calculating failure rate
+        failureRateThreshold: 50      # If 50% or more calls fail, open the circuit
+        waitDurationInOpenState: 15s  # Keep the circuit open for 15 seconds before transitioning to half-open
