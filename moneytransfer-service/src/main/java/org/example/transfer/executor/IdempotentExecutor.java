@@ -1,8 +1,8 @@
 package org.example.transfer.executor;
 
 
-import org.example.transfer.comm.enums.ExceptionEnum;
-import org.example.transfer.exception.BusinessException;
+import org.example.common.exception.BusinessException;
+import org.example.common.exception.enums.ExceptionEnum;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;

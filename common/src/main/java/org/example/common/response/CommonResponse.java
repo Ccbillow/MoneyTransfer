@@ -1,4 +1,4 @@
-package org.example.transfer.params.resp;
+package org.example.common.response;
 
 /**
  * common response

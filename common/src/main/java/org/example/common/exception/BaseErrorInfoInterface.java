@@ -1,4 +1,4 @@
-package org.example.transfer.exception;
+package org.example.common.exception;
 
 public interface BaseErrorInfoInterface {
 

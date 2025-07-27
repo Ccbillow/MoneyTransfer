@@ -1,6 +1,6 @@
-package org.example.transfer.comm.enums;
+package org.example.common.exception.enums;
 
-import org.example.transfer.exception.BaseErrorInfoInterface;
+import org.example.common.exception.BaseErrorInfoInterface;
 
 /**
  * exception enum

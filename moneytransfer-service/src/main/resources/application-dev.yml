@@ -12,3 +12,9 @@ spring:
 
 transfer:
   enable-different-currency-transfer: false
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true

@@ -1,4 +1,4 @@
-package org.example.transfer.exception;
+package org.example.common.exception;
 
 public class BusinessException extends RuntimeException{
     private static final long serialVersionUID = 1L;

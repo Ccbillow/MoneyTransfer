@@ -3,8 +3,8 @@ package org.example.transfer.executor;
 import io.github.resilience4j.ratelimiter.RateLimiter;
 import io.github.resilience4j.ratelimiter.RateLimiterRegistry;
 import io.github.resilience4j.ratelimiter.RequestNotPermitted;
-import org.example.transfer.comm.enums.ExceptionEnum;
-import org.example.transfer.exception.BusinessException;
+import org.example.common.exception.BusinessException;
+import org.example.common.exception.enums.ExceptionEnum;
 import org.springframework.stereotype.Component;
 
 import java.util.function.Supplier;

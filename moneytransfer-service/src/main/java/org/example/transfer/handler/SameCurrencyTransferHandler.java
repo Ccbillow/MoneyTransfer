@@ -2,10 +2,10 @@ package org.example.transfer.handler;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.example.common.exception.enums.ExceptionEnum;
 import org.example.transfer.comm.BaseConstant;
-import org.example.transfer.comm.enums.ExceptionEnum;
 import org.example.transfer.comm.enums.TransferTypeEnum;
-import org.example.transfer.exception.BusinessException;
+import org.example.common.exception.BusinessException;
 import org.example.transfer.model.Account;
 import org.example.transfer.model.TransferLog;
 import org.example.transfer.repository.AccountRepository;

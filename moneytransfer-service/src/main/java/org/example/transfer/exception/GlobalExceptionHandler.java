@@ -2,8 +2,9 @@ package org.example.transfer.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.tomcat.util.buf.StringUtils;
-import org.example.transfer.comm.enums.ExceptionEnum;
-import org.example.transfer.params.resp.CommonResponse;
+import org.example.common.exception.BusinessException;
+import org.example.common.exception.enums.ExceptionEnum;
+import org.example.common.response.CommonResponse;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;

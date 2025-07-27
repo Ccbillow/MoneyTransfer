@@ -1,9 +1,9 @@
 package org.example.transfer.controller;
 
+import org.example.common.exception.enums.ExceptionEnum;
+import org.example.common.response.CommonResponse;
 import org.example.transfer.comm.enums.Currency;
-import org.example.transfer.comm.enums.ExceptionEnum;
 import org.example.transfer.params.req.TransferRequest;
-import org.example.transfer.params.resp.CommonResponse;
 import org.example.transfer.util.JsonUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -15,9 +15,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 

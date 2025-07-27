@@ -1,9 +1,9 @@
 package org.example.transfer.controller;
 
+import org.example.common.exception.enums.ExceptionEnum;
+import org.example.common.response.CommonResponse;
 import org.example.transfer.comm.enums.Currency;
-import org.example.transfer.comm.enums.ExceptionEnum;
 import org.example.transfer.params.req.TransferRequest;
-import org.example.transfer.params.resp.CommonResponse;
 import org.example.transfer.util.JsonUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;

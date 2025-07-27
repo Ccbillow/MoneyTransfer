@@ -1,9 +1,9 @@
 package org.example.transfer.service;
 
+import org.example.common.exception.enums.ExceptionEnum;
 import org.example.transfer.client.UserClient;
 import org.example.transfer.comm.enums.Currency;
-import org.example.transfer.comm.enums.ExceptionEnum;
-import org.example.transfer.exception.BusinessException;
+import org.example.common.exception.BusinessException;
 import org.example.transfer.model.Account;
 import org.example.transfer.model.dto.User;
 import org.example.transfer.params.req.TransferRequest;
@@ -17,7 +17,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 

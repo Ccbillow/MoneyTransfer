@@ -1,9 +1,9 @@
 package org.example.transfer.service;
 
+import org.example.common.exception.enums.ExceptionEnum;
 import org.example.transfer.client.UserClient;
 import org.example.transfer.comm.enums.Currency;
-import org.example.transfer.comm.enums.ExceptionEnum;
-import org.example.transfer.exception.BusinessException;
+import org.example.common.exception.BusinessException;
 import org.example.transfer.model.Account;
 import org.example.transfer.model.FxRate;
 import org.example.transfer.model.dto.User;

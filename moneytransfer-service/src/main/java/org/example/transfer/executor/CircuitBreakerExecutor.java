@@ -3,8 +3,8 @@ package org.example.transfer.executor;
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
-import org.example.transfer.comm.enums.ExceptionEnum;
-import org.example.transfer.exception.BusinessException;
+import org.example.common.exception.BusinessException;
+import org.example.common.exception.enums.ExceptionEnum;
 import org.springframework.stereotype.Component;
 
 import java.util.function.Supplier;

@@ -1,12 +1,12 @@
 package org.example.transfer.controller;
 
+import org.example.common.response.CommonResponse;
 import org.example.transfer.client.UserClient;
 import org.example.transfer.comm.enums.Currency;
 import org.example.transfer.model.Account;
 import org.example.transfer.model.FxRate;
 import org.example.transfer.model.dto.User;
 import org.example.transfer.params.req.TransferRequest;
-import org.example.transfer.params.resp.CommonResponse;
 import org.example.transfer.repository.AccountRepository;
 import org.example.transfer.repository.FxRateRepository;
 import org.example.transfer.repository.TransferLogRepository;
