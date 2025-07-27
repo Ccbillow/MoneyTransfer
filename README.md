@@ -233,7 +233,7 @@ All performance tests are based on **same-currency transfers**. The following sc
 - Use **SpringCloud** as microservices                         --done
 - Integrate **CI/CD** (Jenkins/Github Actions)
 - Replace H2 with **PostgreSQL** or **MySQL** for persistence  --done
-- Add **Swagger UI** for API docs
+- Add **Swagger UI** for API docs                              --done
 - Use **Global TraceId** to track
 
 ---
