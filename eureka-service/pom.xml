@@ -10,10 +10,6 @@
     <artifactId>eureka-service</artifactId>
     <packaging>jar</packaging>
 
-    <build>
-        <finalName>eureka-service</finalName>
-    </build>
-
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -33,4 +29,15 @@
         </dependency>
     </dependencies>
 
+
+    <build>
+        <finalName>eureka-service</finalName>
+
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 </project>

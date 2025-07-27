@@ -9,10 +9,6 @@
     <artifactId>user-service</artifactId>
     <packaging>jar</packaging>
 
-    <build>
-        <finalName>user-service</finalName>
-    </build>
-
     <dependencies>
         <dependency>
             <groupId>org.example</groupId>
@@ -63,4 +59,16 @@
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
         </dependency>
     </dependencies>
+
+
+    <build>
+        <finalName>user-service</finalName>
+
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 </project>

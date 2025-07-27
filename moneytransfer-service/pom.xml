@@ -9,10 +9,6 @@
     <artifactId>moneytransfer-service</artifactId>
     <packaging>jar</packaging>
 
-    <build>
-        <finalName>moneytransfer-service</finalName>
-    </build>
-
     <dependencies>
         <dependency>
             <groupId>org.example</groupId>
@@ -101,4 +97,15 @@
             <artifactId>common</artifactId>
         </dependency>
     </dependencies>
+
+    <build>
+        <finalName>moneytransfer-service</finalName>
+
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 </project>

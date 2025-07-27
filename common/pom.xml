@@ -10,8 +10,4 @@
     <artifactId>common</artifactId>
     <packaging>jar</packaging>
     <name>common</name>
-
-    <dependencies>
-
-    </dependencies>
 </project>

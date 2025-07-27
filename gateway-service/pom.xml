@@ -9,10 +9,6 @@
     <artifactId>gateway-service</artifactId>
     <packaging>jar</packaging>
 
-    <build>
-        <finalName>gateway-service</finalName>
-    </build>
-
     <dependencies>
         <dependency>
             <groupId>org.springframework.cloud</groupId>
@@ -23,4 +19,14 @@
             <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
         </dependency>
     </dependencies>
+
+    <build>
+        <finalName>gateway-service</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 </project>
