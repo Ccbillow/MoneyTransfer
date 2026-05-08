@@ -19,7 +19,8 @@ eureka:
       fetch-registry: true
       defaultZone: http://eureka-service:8761/eureka/
 
-
+redisson:
+  config: classpath:redisson.yaml
 
 
 resilience4j:

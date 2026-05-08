@@ -13,6 +13,14 @@ services:
       - mysql-data:/var/lib/mysql
       - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
 
+  redis:
+    image: redis:7.2
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - mynetwork
+
   eureka-service:
     build: ./eureka-service
     ports:
@@ -40,9 +48,10 @@ services:
     ports:
       - "8089:8089"
     depends_on:
+      - mysql
+      - redis
       - eureka-service
       - user-service
-      - mysql
     networks:
       - mynetwork
     environment:
