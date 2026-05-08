@@ -1,6 +1,8 @@
 package org.example.transfer.executor;
 
 import jakarta.persistence.OptimisticLockException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.example.common.exception.BusinessException;
 import org.example.common.exception.enums.ExceptionEnum;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -14,6 +16,8 @@ import java.util.function.Supplier;
  */
 @Component
 public class OptimisticRetryExecutor {
+
+    private static final Logger log = LogManager.getLogger(OptimisticRetryExecutor.class);
 
     // default retry time
     // todo maintain it in ConfigCenter
@@ -42,7 +46,7 @@ public class OptimisticRetryExecutor {
                 return task.get();
             } catch (ObjectOptimisticLockingFailureException | OptimisticLockException e) {
                 retry++;
-                System.out.println("retry:" + retry);
+                log.info("Optimistic lock conflict, retry attempt: {}/{}", retry, maxRetries);
                 if (retry > maxRetries) {
                     //todo 1. save to error table; 2. send email to developer
                     throw new BusinessException(ExceptionEnum.OPTIMISTIC_LOCK_MAX_RETRY_ERROR.getErrorCode(),

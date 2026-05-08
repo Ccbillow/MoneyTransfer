@@ -19,11 +19,12 @@ public class TransferHandlerFactory implements InitializingBean, ApplicationCont
     private ApplicationContext appContext;
 
     public TransferHandler getHandler(TransferTypeEnum transferType) {
-        if (!TRANSFER_HANDLER_MAP.containsKey(transferType)) {
+        TransferHandler handler = TRANSFER_HANDLER_MAP.get(transferType);
+        if (handler == null) {
             log.error("transferType:{} is not supported by the system, please contact developer.", transferType);
+            throw new IllegalArgumentException("Unsupported transfer type: " + transferType);
         }
-
-        return TRANSFER_HANDLER_MAP.get(transferType);
+        return handler;
     }
 
     /**

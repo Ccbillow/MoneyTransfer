@@ -133,7 +133,7 @@ public class TransferServiceImpl implements TransferService {
             throw new BusinessException(ExceptionEnum.USER_NOT_EXIST.getErrorCode(), "from account not exist");
         }
         if (userMap.get(toId) == null) {
-            log.error("traceId:{}, receiver account not exist, to:[{}]", traceId, fromId);
+            log.error("traceId:{}, receiver account not exist, to:[{}]", traceId, toId);
             throw new BusinessException(ExceptionEnum.USER_NOT_EXIST.getErrorCode(), "to account not exist");
         }
 

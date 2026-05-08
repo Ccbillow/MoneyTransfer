@@ -21,7 +21,7 @@ Concurrent Money Transfer Service — Spring Boot 3 REST service with optimistic
 
 - Money can be transferred to an account only in its base currency.
 - Money can only be transferred from an account in its base currency
-- The FX conversion rate is 0.50 USD to 1 AUD.
+- The FX conversion rate is 1 USD = 2 AUD (rate: 2.0).
 - A transaction fee of 1% applies to all transfers and is charged to transaction initiator
 - Implement a mechanism to handle concurrent transactions safely.
 
@@ -34,7 +34,7 @@ Concurrent Money Transfer Service — Spring Boot 3 REST service with optimistic
 
 #### FX Rate
 
-- `0.50 USD` = `1 AUD`
+- `1 USD` = `2 AUD` (rate stored as 2.0)
 
 #### Transaction Fee
 

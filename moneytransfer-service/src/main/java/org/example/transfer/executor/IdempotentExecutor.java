@@ -76,14 +76,20 @@ public class IdempotentExecutor {
      */
     public <T> T executeWithIdempotency(String idempotentKey, long expireSeconds, Supplier<T> task) {
         RBucket<String> bucket = redissonClient.getBucket(idempotentKey);
-        if (bucket.isExists()) {
+        // trySet is atomic (Redis SET NX) — prevents race condition between check and set
+        boolean acquired = bucket.trySet("PROCESSING", expireSeconds, TimeUnit.SECONDS);
+        if (!acquired) {
             throw new BusinessException(ExceptionEnum.IDEMPOTENT_REQUEST.getErrorCode(),
                     String.format("Duplicate request, requestId: %s", idempotentKey));
         }
-
-        T result = task.get();
-
-        bucket.set("DONE", expireSeconds, TimeUnit.SECONDS);
-        return result;
+        try {
+            T result = task.get();
+            bucket.set("DONE", expireSeconds, TimeUnit.SECONDS);
+            return result;
+        } catch (Exception e) {
+            // release key on failure so the caller can retry with the same requestId
+            bucket.delete();
+            throw e;
+        }
     }
 }
