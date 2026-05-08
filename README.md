@@ -15,8 +15,7 @@
 
 ## Overview
 
-A production-grade Java Spring Boot application that simulates a **concurrent-safe** money transfer system between
-accounts using an in-memory H2 database.
+Concurrent Money Transfer Service — Spring Boot 3 REST service with optimistic locking, idempotency (requestId), FX conversion, circuit breaker, and rate limiting. Validated under 1000-thread concurrent load via JMeter.
 
 ## Details
 
